@@ -446,43 +446,6 @@ public class SearchActivity extends BaseActivity {
         }
     }
 
-    /* renamed from: com.bosch.diag.activity.SearchActivity.1 */
-    class C00891 implements OnChildClickListener {
-        C00891() {
-        }
-
-        public boolean onChildClick(ExpandableListView parent, View v, int groupPosition, int childPosition, long id) {
-            Log.d(SearchActivity.this.LOG_TAG, "child click group" + groupPosition + "child" + childPosition);
-            if (SearchActivity.this.mEnterForConnectionLost) {
-                SearchActivity.this.stopConnectionService();
-            }
-            SearchActivity.this.connectDecvie(((DeviceGroup) SearchActivity.this.groups.get(groupPosition)).getBluetoothDevice(childPosition));
-            return true;
-        }
-    }
-
-    /* renamed from: com.bosch.diag.activity.SearchActivity.2 */
-    class C00902 implements OnClickListener {
-        C00902() {
-        }
-
-        public void onClick(View arg0) {
-            if (SearchActivity.this.mSearchButton.getText().equals(SearchActivity.this.startSearch)) {
-                SearchActivity.this.mFoundDevice.deviceList.clear();
-                BluetoothTools.mDevices.clear();
-                SearchActivity.this.updateList();
-                SearchActivity.this.startDiscovery();
-                if (!SearchActivity.this.mAnimationDrawable.isRunning()) {
-                    SearchActivity.this.mAnimationDrawable.start();
-                }
-                SearchActivity.this.mSearchButton.setText(SearchActivity.this.stopSearch);
-            } else if (SearchActivity.this.mSearchButton.getText().equals(SearchActivity.this.stopSearch)) {
-                SearchActivity.this.stopfindDevice();
-                SearchActivity.this.mSearchButton.setText(SearchActivity.this.startSearch);
-            }
-        }
-    }
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -519,15 +482,48 @@ public class SearchActivity extends BaseActivity {
         this.mNoDataView = (TextView) findViewById(R.id.no_data_view);
         this.mPairedDevice.name = this.pairedDevice;
         this.mFoundDevice.name = this.foundDevice;
+        Log.d(this.LOG_TAG, "onCreat_mAdapter");
         this.mAdapter = new MyAdapter(this.mContext, this.groups);
+        Log.d(this.LOG_TAG, "onCreat_after mAdapter");
         this.mListView.setAdapter(this.mAdapter);
-        updateDataPaired();
-        updateList();
-        Log.d(this.LOG_TAG, "onCreat_updateList");
-        this.mListView.setOnChildClickListener(new C00891());
+        //updateDataPaired();
+        Log.d(this.LOG_TAG, "onCreat_pass mAdapter");
+        //updateList();
+        Log.d(this.LOG_TAG, "onCreat_pass updateList");
+        this.mListView.setOnChildClickListener(new OnChildClickListener() {
+            @Override
+            public boolean onChildClick(ExpandableListView parent, View v, int groupPosition, int childPosition, long id) {
+                Log.d(SearchActivity.this.LOG_TAG, "child click group" + groupPosition + "child" + childPosition);
+                if (SearchActivity.this.mEnterForConnectionLost) {
+                    SearchActivity.this.stopConnectionService();
+                }
+                SearchActivity.this.connectDecvie(((DeviceGroup) SearchActivity.this.groups.get(groupPosition)).getBluetoothDevice(childPosition));
+                return true;
+            }
+        });
+        Log.d(this.LOG_TAG, "onCreat_setOnChildClickListener");
+
         this.mSearchButton = (Button) findViewById(R.id.SearchActivity_Search_button);
         this.mSearchButton.setText(this.startSearch);
-        this.mSearchButton.setOnClickListener(new C00902());
+        this.mSearchButton.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View arg0) {
+                if (SearchActivity.this.mSearchButton.getText().equals(SearchActivity.this.startSearch)) {
+                    SearchActivity.this.mFoundDevice.deviceList.clear();
+                    BluetoothTools.mDevices.clear();
+                    SearchActivity.this.updateList();
+                    SearchActivity.this.startDiscovery();
+                    if (!SearchActivity.this.mAnimationDrawable.isRunning()) {
+                        SearchActivity.this.mAnimationDrawable.start();
+                    }
+                    SearchActivity.this.mSearchButton.setText(SearchActivity.this.stopSearch);
+                } else if (SearchActivity.this.mSearchButton.getText().equals(SearchActivity.this.stopSearch)) {
+                    SearchActivity.this.stopfindDevice();
+                    SearchActivity.this.mSearchButton.setText(SearchActivity.this.startSearch);
+                }
+            }
+        });
+        Log.d(this.LOG_TAG, "onCreat_setOnClickListener");
     }
 
     private void initStringRes() {
@@ -556,9 +552,11 @@ public class SearchActivity extends BaseActivity {
         this.connectFail = cManager.getString(this.mCurrentLanguage, Strings.CONNECT_FAIL);
     }
 
+    @Override
     protected void onStart() {
         super.onStart();
-        startDiscovery();
+        //startDiscovery();
+        Log.d(this.LOG_TAG, "onCreat_pass onStart");
         if (this.mSearchButton != null) {
             this.mSearchButton.setText(this.stopSearch);
         }
@@ -567,11 +565,13 @@ public class SearchActivity extends BaseActivity {
         }
     }
 
+    @Override
     protected void onResume() {
         super.onResume();
         registBroadcast();
     }
 
+    @Override
     protected void onPause() {
         super.onPause();
         try {
@@ -588,6 +588,7 @@ public class SearchActivity extends BaseActivity {
         startService(intent);
     }
 
+    @Override
     protected void onStop() {
         super.onStop();
         this.groups.clear();

@@ -23,7 +23,7 @@ import static android.graphics.PixelFormat.RGBA_8888;
 
 public class LoadActivity extends Activity {
 
-    private static final int LOAD_DISPLAY_TIME = 3000;
+    private static final int LOAD_DISPLAY_TIME = 1000;
     protected String LOG_TAG = "loadactivity";
     private Activity mContext;
     protected String mCurrentLanguage;
