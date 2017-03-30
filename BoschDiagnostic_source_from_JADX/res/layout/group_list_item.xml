@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout android:orientation="0" android:padding="5dp" android:layout_width="-1" android:layout_height="-2">
+    <TextView android:textColor="#004986" android:gravity="10" android:layout_gravity="10" android:id="@id/group_list_item_text" android:paddingLeft="5dp" android:layout_width="0dp" android:layout_height="-2" android:layout_weight="7.0" />
+    <ImageView android:layout_gravity="10" android:id="@id/device_unpair_line" android:background="#004986" android:paddingTop="10dp" android:paddingBottom="10dp" android:visibility="0" android:layout_width="1dp" android:layout_height="-2" android:layout_marginRight="15dp" />
+    <RadioButton android:layout_gravity="10" android:id="@id/device_cancel_paired" android:paddingTop="10dp" android:paddingBottom="10dp" android:visibility="0" android:clickable="true" android:layout_width="0dp" android:layout_height="-2" android:button="@drawable/upair_radiobtn_selector" android:layout_weight="1.0" />
+</LinearLayout>

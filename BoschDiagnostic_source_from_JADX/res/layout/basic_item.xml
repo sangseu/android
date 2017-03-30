@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout android:paddingLeft="8dp" android:paddingTop="10dp" android:paddingRight="10dp" android:paddingBottom="8dp" android:layout_width="-1" android:layout_height="-2">
+    <TextView android:textSize="18sp" android:textColor="#004986" android:id="@id/item_text" android:layout_width="-2" android:layout_height="-2" />
+    <TextView android:textSize="18sp" android:textColor="#004986" android:id="@id/item_value" android:layout_width="-2" android:layout_height="-2" android:layout_alignParentRight="true" />
+</RelativeLayout>

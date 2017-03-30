@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout android:orientation="horizontal" android:padding="5.0dip" android:layout_width="fill_parent" android:layout_height="wrap_content"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+    <TextView android:textColor="#004986" android:gravity="center_vertical" android:layout_gravity="center_vertical" android:id="@+id/group_list_item_text" android:paddingLeft="5.0dip" android:layout_width="0.0dip" android:layout_height="wrap_content" android:layout_weight="7.0" />
+    <ImageView android:layout_gravity="center_vertical" android:id="@+id/device_unpair_line" android:background="#004986" android:paddingTop="10.0dip" android:paddingBottom="10.0dip" android:visibility="visible" android:layout_width="1.0dip" android:layout_height="wrap_content" android:layout_marginRight="15.0dip" />
+    <RadioButton android:layout_gravity="center_vertical" android:id="@+id/device_cancel_paired" android:paddingTop="10.0dip" android:paddingBottom="10.0dip" android:visibility="visible" android:clickable="true" android:layout_width="0.0dip" android:layout_height="wrap_content" android:button="@drawable/upair_radiobtn_selector" android:layout_weight="1.0" />
+</LinearLayout>

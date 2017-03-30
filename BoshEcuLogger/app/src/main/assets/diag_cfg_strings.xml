@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bosch>
+    <!-- 帮助界面字符串 begin -->
+    <string id="help" en="Help" zh="帮助"/>
+    <string id="software_version" en="App Version" zh="应用程序版本"/>
+    <string id="config_version" en="Parameter Version" zh="配置文件版本"/>
+    <string id="bt_config" en="Bluetooth setting" zh="蓝牙设置"/>
+    <string id="repair_guide" en="FAQ" zh="维修指南"/>
+    <string id="pdf_no_app" en="No Application Found For Viewing PDF" zh="找不到可以打开pdf的程序"/>
+    <string id="faq_not_found" en="FAQ pdf Not Found" zh="找不到维修指南pdf"/>
+    <!-- 帮助界面字符串 end -->
+    <string id="available_devices" en="AVAILABLE DEVICES" zh="可用设备"/>
+    <string id="paired_devices" en="PAIRED DEVICES" zh="已配对的设备"/>
+    <!-- 3个tab的名字  begin-->
+    <string id="diagnostic" en="Diag." zh="诊断"/>
+    <string id="basic" en="Basic" zh="基本"/> 
+    <string id="advanced" en="Adv." zh="高级"/>
+    <!-- 3个tab的名字 end -->
+    <string id="cancel_paired" en="cancel" zh="取消配对"/>
+    <string id="device_not_found" en="device not found" zh="设备未找到"/>
+    <string id="exit_title" en="Exit" zh="退出提示"/>
+    <string id="exit_message" en="Are you sure to exit the diagnostic program?" zh="您确定退出诊断程序吗?"/>
+    <string id="exit_posbtn" en="Exit" zh="退出"/>
+    <string id="exit_navbtn" en="Cancel" zh="取消"/>
+    <string id="stop_search" en="Stop" zh="停止"/>
+    <string id="title_main" en="eScooter" zh="诊断工具"/>
+    <string id="bt_paired_device" en="PAIRED DEVICES" zh="已配对的设备"/>
+    <string id="bt_found_device" en="AVAILABLE DEVICES" zh="可用设备"/>
+    <string id="wait" en="wait" zh="等待"/>
+    <string id="wait_content" en="connect to device,please wait!" zh="正在连接设备，请等待！"/>
+    <string id="device_connect_error" en="device connect error,please check if device in use" zh="设备连接失败，请检查设备是否被占用"/>
+    <string id="unpair_title" en="Unpaired" zh="取消配对"></string>
+    <string id="unpair_message" en="Are you sure to unpair the bluetooth device?" zh="您确定取消配对此蓝牙设备?"/>
+    <string id="unpair_failed_title" en="Unpair failed" zh="取消配对失败"></string>
+    <string id="unpair_failed_message" en="Unpair device failed, are you sure to navigative to system bluetooth settings?"
+        zh="取消配对失败，您确认是否导航到系统蓝牙设置界面?"></string>
+    <string id="unpair_posbtn" en="Yes" zh="是"/>
+    <string id="unpair_navbtn" en="Cancel" zh="否"/>
+    <string id="no_fault" en="No Fault" zh="没有故障"/>
+    <string id="no_device" en="No Available Device" zh="没有可用设备"/>
+    <string id="start_search" en="Scan" zh="扫描"/>
+    <string id="content_unavailable_controller" en="Your program unsupport the ECU device, please download a new version." zh="无法支持该控制器, 请下载新版本."/>
+    <string id="bt_ok" en="OK" zh="确定"/>
+    <!-- error messges -->
+    <string id="connect_error" en="Connetion Error" zh="连接失败"/>
+    <string id="handshake_fail" en="Handshake Fail" zh="握手失败"/>
+    <string id="get_software_error" en="Get device software information error" zh="获取设备软件信息出错"/>
+    <string id="timeout" en="timeout" zh="超时"/>
+    <string id="wrong_package" en="got wrong package" zh="错误的数据包"/>
+    <string id="data_validate_error" en="data validate error" zh="数据校验失败"/>
+    <!-- error messges end-->
+    <string id="already_connect" en="already connect" zh="已连接"/>
+    <string id="connect_to" en="connecting to " zh="正在连接到"/>
+    <string id="connect_fail" en="connect fail" zh="连接失败"/>
+</bosch>

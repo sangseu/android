@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu>
+    <item app:id="@id/action_progressbar" app:showAsAction="2" app:actionLayout="@layout/actionbar_progressbar_view" />
+    <item app:id="@id/action_encn" app:showAsAction="2" app:actionLayout="@layout/actionbar_view" />
+    <item app:icon="@drawable/icons_lights" app:id="@id/action_settings" app:showAsAction="2" />
+</menu>

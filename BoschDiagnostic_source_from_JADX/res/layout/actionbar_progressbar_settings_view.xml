@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout android:orientation="0" android:background="#dbe9f9" android:layout_width="-2" android:layout_height="-2">
+    <ImageView android:id="@id/button_settings" android:background="0x108005f" android:layout_width="-2" android:layout_height="-2" />
+</LinearLayout>

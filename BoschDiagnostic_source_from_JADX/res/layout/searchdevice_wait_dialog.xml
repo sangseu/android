@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout android:orientation="1" android:background="#dbe9f9" android:layout_width="-2" android:layout_height="-2">
+    <TextView android:textSize="20sp" android:textColor="#004986" android:id="@id/wait_title" android:paddingLeft="10dp" android:paddingTop="5dp" android:layout_width="-1" android:layout_height="-2" />
+    <ImageView android:background="#004986" android:layout_width="-1" android:layout_height="1dp" />
+    <LinearLayout android:orientation="0" android:layout_width="-2" android:layout_height="-2">
+        <ProgressBar android:layout_width="-2" android:layout_height="-2" android:indeterminateDrawable="@drawable/wait_progressbar" />
+        <TextView android:textSize="18sp" android:textColor="#004986" android:id="@id/wait_message" android:paddingLeft="5dp" android:paddingTop="10dp" android:layout_width="-1" android:layout_height="-2" />
+    </LinearLayout>
+</LinearLayout>

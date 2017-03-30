@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bosch>
+    <software>
+        <!-- 配置文件版本号:与配置文件名称后缀一样,只做对应的显示，没有实际的逻辑控制功能。 -->
+        <softwareVersion>255.6.1</softwareVersion>
+        <!-- 配置文件发行版本,对应帮助界面：配置文件版本显示 -->
+        <configVersion>1.2</configVersion>
+        <!-- 应用程序版本号,对应帮助界面:应用程序版本显示 -->
+        <appVersion>1.0</appVersion>
+    </software>
+    <!-- 0:小端模式 1:大端模式-->
+    <endian value="0" />
+    <interval value="150"></interval>
+    
+    <!-- 可配置的读状态信息指令 -->
+    <!-- 命令:0xC0, 长度:0x3D, ID:0x06 -->
+    <command name="read_status" cmd="C0" length="3D" id="06"/>
+
+    <!-- 诊断信息 -->
+    <Diagnostic>
+        <!-- 故障类别：转把故障 -->
+        <FaultGroup en="ThrottleFault" zh="转把故障">
+            <!-- 细化故障： 转把故障 S[7]字节 第2位-->
+            <Fault en="ThrottleFault" zh="转把故障" position="7" bit="2" 
+                promptzh="请检查转把及其连线。" prompten="Please check the throttle and connection."/>
+
+            <!-- 细化故障： 连线故障 S[7]字节 第1位-->
+            <Fault en="WiringFault" zh="连线故障" position="7" bit="1"
+                promptzh="请检查转把及其连线并重新上电。" prompten="Please check the throttle and connection, then recycle the power."/>
+
+            <!-- 细化故障： 启动锁止 S[7]字节 第0位-->
+            <Fault en="StartupLockFault" zh="启动锁止" position="7" bit="0"
+                promptzh="请把转把归零。" prompten="Please return the throttle to neutral."/>
+        </FaultGroup>
+
+        <!-- 故障类别：刹车故障 -->
+        <FaultGroup en="BrakeFault" zh="刹车故障">
+            <!-- 细化故障： 刹车故障 S[7]字节 第3位-->
+            <Fault en="BrakeFault" zh="刹车故障" position="7" bit="3"
+                promptzh="请检查刹把及其连线。" prompten="Please check the brake and connection."/>
+
+            <!-- 细化故障： 刹车模式 S[56]字节 第5位-->
+            <Fault en="eBrakingMode" zh="刹车模式" position="56" bit="5"
+                promptzh="请检查刹把及其连线。" prompten="Please check the brake and connection."/>
+        </FaultGroup>
+
+        <!-- 故障类别：电池故障 -->
+        <FaultGroup en="BatteryFault" zh="电池故障">
+            <!-- 细化故障： 欠压故障 S[10]字节 第0位-->
+            <Fault en="UndervoltageFault" zh="欠压故障" position="10" bit="0"
+                promptzh="请给电池充电。" prompten="Please charge the battery."/>
+
+            <!-- 细化故障： 硬件过压故障 S[10]字节 第5位-->
+            <Fault en="OvervoltageFault_HW" zh="硬件过压故障" position="10" bit="5"
+                promptzh="请检查电池类型及连线。" prompten="Please check the battery type and connection."/>
+
+            <!-- 细化故障： 过压故障 S[10]字节 第2位-->
+            <Fault en="OvervoltageFault" zh="过压故障" position="10" bit="2"
+                promptzh="请检查电池类型及连线。" prompten="Please check the battery type and connection."/>
+        </FaultGroup>
+ 
+        <!-- 故障类别：防盗故障 -->
+        <FaultGroup en="Anti-TheftFault" zh="防盗故障">
+            <!-- 细化故障： 防盗电源故障 S[10]字节 第6位-->
+            <Fault en="AntiTheftPowerFault" zh="防盗电源故障" position="10" bit="6"
+                promptzh="请检查防盗器。" prompten="Please check anti-theft device."/>
+
+            <!-- 细化故障： 防盗模式 S[56]字节 第6位-->
+            <Fault en="Anti-TheftMode" zh="防盗模式" position="56" bit="6"
+                promptzh="请检查防盗器及其连线。" prompten="Please check anti-theft device and connection."/>
+        </FaultGroup>
+
+        <!-- 故障类别：电机故障 -->
+        <FaultGroup en="MotorFault" zh="电机故障">
+            <!-- 细化故障： 电机开路故障 S[10]字节 第4位-->
+            <Fault en="MotorOpenFault" zh="电机开路故障" position="10" bit="4"
+                promptzh="请检查电机相线。" prompten="Please check motor phase."/>
+
+            <!-- 细化故障： 电机堵转故障 S[10]字节 第1位-->
+            <Fault en="MotorStallFault" zh="电机堵转故障" position="10" bit="1"
+                promptzh="请检查电机霍尔及其连线。" prompten="Please check motor hall and connection."/>
+
+            <!-- 细化故障： 霍尔缺相 S[57]字节 第4位-->
+            <Fault en="OnehallMissing" zh="霍尔缺相" position="57" bit="4"
+                promptzh="请检查电机霍尔及其连线。" prompten="Please check motor hall and connection."/>
+
+            <!-- 细化故障： 霍尔故障 S[8]字节 第1位-->
+            <Fault en="HallFault" zh="霍尔故障" position="8" bit="1"
+                promptzh="请检查电机霍尔及其连线。" prompten="Please check motor hall and connection."/>
+        </FaultGroup>
+
+        <!-- 故障类别：控制器故障 -->
+        <FaultGroup en="ECUFault" zh="控制器故障">
+            <!-- 细化故障： 电池电流传感器故障 S[7]字节 第4位-->
+            <Fault en="BatteryCurrenSenseFault" zh="电池电流传感器故障" position="7" bit="4"
+                promptzh="请更换控制器。" prompten="Please replace ECU."/>
+
+            <!-- 细化故障： 电机电流传感器故障 S[7]字节 第5位-->
+            <Fault en="MotorCurrenSenseFault" zh="电机电流传感器故障" position="7" bit="5"
+                promptzh="请更换控制器。" prompten="Please replace ECU."/>
+
+            <!-- 细化故障： 功率管故障 S[7]字节 第6位-->
+            <Fault en="MOSFETFault" zh="功率管故障" position="7" bit="6"
+                promptzh="请更换控制器。" prompten="Please replace ECU."/>
+
+            <!-- 细化故障： 14V 电源故障 S[7]字节 第7位-->
+            <Fault en="14PowerFault" zh="14V 电源故障" position="7" bit="7"
+                promptzh="请更换控制器。" prompten="Please replace ECU."/>
+
+            <!-- 细化故障： 参数故障 S[8]字节 第0位-->
+            <Fault en="EEPROMFault" zh="参数故障" position="8" bit="0"
+                promptzh="请更换控制器。" prompten="Please replace ECU."/>
+
+            <!-- 细化故障： 程序代码故障 S[8]字节 第3位-->
+            <Fault en="ROMFault" zh="程序代码故障" position="8" bit="3"
+                promptzh="请更换控制器。" prompten="Please replace ECU."/>
+
+            <!-- 细化故障： 内存故障 S[8]字节 第2位-->
+            <Fault en="RAMFault" zh="内存故障" position="8" bit="2"
+                promptzh="请更换控制器。" prompten="Please replace ECU."/>
+
+            <!-- 细化故障： 堆栈溢出 S[8]字节 第4位-->
+            <Fault en="StackOverflow" zh="堆栈溢出" position="8" bit="4"
+                promptzh="请更换控制器。" prompten="Please replace ECU."/>
+
+            <!-- 细化故障： 电机短路故障 S[10]字节 第1位-->
+            <Fault en="MotorShortFault" zh="电机短路故障" position="10" bit="3"
+                promptzh="请检查电机及其连线或更换控制器。" prompten="Please check motor and connection or replace ECU."/>
+
+            <!-- 细化故障： 过热保护 S[10]字节 第7位-->
+            <Fault en="ThermalFault" zh="过热保护" position="10" bit="7"
+                promptzh="请等待控制器冷却。" prompten="Please wait for the cooling of ECU."/>
+        </FaultGroup>
+    </Diagnostic>
+
+    <!-- 基本信息 -->
+    <BasicInformation>
+        <!-- 非位变量, 内容:电池电压, 字长:2, 起始字节:36, 转换公式:x/128, 小数位数:1, 单位:V -->
+        <Information 
+            en="Battery Voltage" zh="电池电压" length="2" start="36" expression="x/128" decimalLength="1" unit="V" signed="N"/>
+
+        <!-- 非位变量, 内容:转把, 字长:1, 起始字节:43, 转换公式:x*100/255, 小数位数:0, 单位:% -->
+        <Information en="ThrottleInput" zh="转把" length="1" start="43" expression="x*100/255" decimalLength="0" unit="%" signed="N"/>
+
+        <!-- 非位变量, 内容:车速, 字长:2, 起始字节:52, 转换公式:x*0.0768/32, 小数位数:1, 单位:km/h -->
+        <Information en="Speed" zh="车速" length="2" start="54" expression="x/100" decimalLength="1" unit="km/h" signed="Y"/>
+
+        <!-- 非位变量, 内容:速度模式, 字长:1, 起始字节:58, 转换公式:x+1, 小数位数:0, 单位: -->
+        <Information en="SpeedModes" zh="速度模式" length="1" start="58" expression="x+1" decimalLength="0" unit="" signed="N"/>
+
+        <!-- 位变量, 内容:巡航, 起始字节:56, 位:2, 位"1"中文显示:开, 位"0"中文显示:关， 位"1"英文显示:On, 位"0"英文显示:Off-->
+        <BitInfomation en="Cruise" zh="巡航" position="56" bit="3" zh1="开" zh0="关" en1="On" en0="Off"/>
+
+        <!-- 位变量, 内容:限速, 起始字节:56, 位:7, 位"1"中文显示:开, 位"0"中文显示:关， 位"1"英文显示:On, 位"0"英文显示:Off-->
+        <BitInfomation en="SpeedLimit" zh="限速" position="11" bit="0" zh1="开" zh0="关" en1="On" en0="Off"/>
+
+        <!-- 位变量, 内容:刹车, 起始字节:56, 位:5, 位"1"中文显示:开, 位"0"中文显示:关， 位"1"英文显示:On, 位"0"英文显示:Off-->
+        <BitInfomation en="eBraking" zh="刹车" position="56" bit="5" zh1="开" zh0="关" en1="On" en0="Off"/>
+
+        <!-- 位变量, 内容:防盗, 起始字节:56, 位:6, 位"1"中文显示:开, 位"0"中文显示:关， 位"1"英文显示:On, 位"0"英文显示:Off-->
+        <BitInfomation en="Anti-Theft" zh="防盗" position="56" bit="6" zh1="开" zh0="关" en1="On" en0="Off"/>
+
+        <!-- 非位变量, 内容:单次里程, 字长:2, 起始字节:0, 转换公式:x*1.28/1000, 小数位数:1, 单位:km -->
+        <Information en="Trip Odometer" zh="单次里程" length="2" start="0" expression="x/100" decimalLength="1" unit="km" signed="N"/>
+
+        <!-- 非位变量, 内容:总里程, 字长:4, 起始字节:2, 转换公式:x*1.28/1000, 小数位数:0, 单位:km -->
+        <Information en="odometer" zh="总里程" length="4" start="2" expression="x/1000" decimalLength="0" unit="km" signed="N"/> 
+    </BasicInformation>
+
+    <!-- 高级信息 -->
+    <AdvancedInformation>
+        <BaseInformation en="Software Info" zh="软件信息"/>
+        <BaseInformation en="Hardware Info" zh="硬件信息"/>
+        <BaseInformation en="Serial No" zh="序列号"/>
+        <!-- 非位变量, 内容:B+电压, 字长:2, 起始字节:38, 转换公式:x/128, 小数位数:1, 单位:V -->
+        <Information en="B+ Voltage" zh="B+电压" length="2" start="38" expression="x/128" decimalLength="1" unit="V" signed="N"/>
+
+        <!-- 非位变量, 内容:电池电流, 字长:2, 起始字节:48, 转换公式:x/128, 小数位数:0, 单位:A -->
+        <Information en="Battery Current" zh="电池电流" length="2" start="48" expression="x/128" decimalLength="0" unit="A" signed="Y"/>
+
+        <!-- 非位变量, 内容:电机电流, 字长:2, 起始字节:44, 转换公式:x/128, 小数位数:0, 单位:A -->
+        <Information en="Motor Current" zh="电机电流" length="2" start="44" expression="x/128" decimalLength="0" unit="A" signed="Y"/>
+
+        <!-- 非位变量, 内容:14V 电源, 字长:2, 起始字节:40, 转换公式:x/128, 小数位数:1, 单位:V -->
+        <Information en="Power14VVoltage" zh="14V 电源" length="2" start="40" expression="x/128" decimalLength="1" unit="V" signed="N"/>
+
+        <!-- 非位变量, 内容:内部温度, 字长:1, 起始字节:42, 转换公式:x-55, 小数位数:0, 单位:°C -->
+        <Information en="Internal Temperature" zh="内部温度" length="1" start="42" expression="x-55" decimalLength="0" unit="°C" signed="N"/>
+
+        <!-- 位变量, 内容:霍尔 A, 起始字节:35, 位:0, 位"1"中文显示:1, 位"0"中文显示:0， 位"1"英文显示:1, 位"0"英文显示:0-->
+        <BitInfomation en="HallA" zh="霍尔 A" position="35" bit="0" zh1="1" zh0="0" en1="1" en0="0"/>
+
+        <!-- 位变量, 内容:霍尔 B, 起始字节:35, 位:1, 位"1"中文显示:1, 位"0"中文显示:0， 位"1"英文显示:1, 位"0"英文显示:0-->
+        <BitInfomation en="HallB" zh="霍尔 B" position="35" bit="1" zh1="1" zh0="0" en1="1" en0="0"/>
+
+        <!-- 位变量, 内容:霍尔 C, 起始字节:35, 位:2, 位"1"中文显示:1, 位"0"中文显示:0， 位"1"英文显示:1, 位"0"英文显示:0-->
+        <BitInfomation en="HallC" zh="霍尔 C" position="35" bit="2" zh1="1" zh0="0" en1="1" en0="0"/>
+    </AdvancedInformation>
+</bosch>

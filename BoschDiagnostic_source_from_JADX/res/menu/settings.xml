@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu>
+    <item app:id="@id/action_progressbar_refresh" app:showAsAction="2" app:actionLayout="@layout/actionbar_progressbar_settings_view" />
+</menu>
