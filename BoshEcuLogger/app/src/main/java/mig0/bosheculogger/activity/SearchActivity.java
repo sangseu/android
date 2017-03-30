@@ -49,6 +49,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Set;
 
+
+
 public class SearchActivity extends BaseActivity {
     private static final int CMD_ALL_DEVICE_FOUND = 1003;
     private static final int CMD_CANCEL_PAIRED_DEVICE = 1004;
@@ -94,21 +96,21 @@ public class SearchActivity extends BaseActivity {
     private String unpairTitle = "";
     private String waitContent;
     private String waitTitle;
-
+    protected String LOG_TAG = "search_activity";
 
     private class BluetoothDiagBroadcast extends BroadcastReceiver {
         private BluetoothDiagBroadcast() {
         }
-
+        @Override
         public void onReceive(Context ctx, Intent intent) {
             if (intent != null) {
                 String actionString = intent.getAction();
                 Log.d(SearchActivity.this.LOG_TAG, "current connected action: " + actionString);
                 Message message;
-                if ("android.bluetooth.device.action.FOUND".equals(actionString)) {
-                    BluetoothDevice bluetoothDevice = (BluetoothDevice) intent.getParcelableExtra("android.bluetooth.device.extra.DEVICE");
+                if (BluetoothDevice.ACTION_FOUND.equals(actionString)) {
+                    BluetoothDevice bluetoothDevice = (BluetoothDevice) intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
                     if (bluetoothDevice.getBondState() != 12) {
-                        Log.i(SearchActivity.this.LOG_TAG, "Bluetooth Signal Strength:    " + bluetoothDevice.getName() + ":  " + intent.getExtras().getShort("android.bluetooth.device.extra.RSSI") + "dBM");
+                        Log.i(SearchActivity.this.LOG_TAG, "Bluetooth Signal Strength:    " + bluetoothDevice.getName() + ":  " + intent.getExtras().getShort(BluetoothDevice.EXTRA_RSSI) + "dBM");
                     }
                     if (!(bluetoothDevice == null || TextUtils.isEmpty(bluetoothDevice.getName()) || BluetoothTools.mDevices.contains(bluetoothDevice))) {
                         BluetoothTools.mDevices.add(bluetoothDevice);
@@ -119,7 +121,7 @@ public class SearchActivity extends BaseActivity {
                         message.what = SearchActivity.CMD_DEVICE_FOUND;
                         SearchActivity.this.mSearchHandler.sendMessage(message);
                     }
-                } else if ("android.bluetooth.adapter.action.DISCOVERY_FINISHED".equals(actionString)) {
+                } else if (BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(actionString)) {
                     SearchActivity.this.mAnimationDrawable.stop();
                     SearchActivity.this.mSearchButton.setText(SearchActivity.this.startSearch);
                     if (BluetoothTools.mDevices.isEmpty()) {
@@ -131,9 +133,9 @@ public class SearchActivity extends BaseActivity {
                         message.what = SearchActivity.CMD_ALL_DEVICE_FOUND;
                         SearchActivity.this.mSearchHandler.sendMessage(message);
                     }
-                } else if (!"android.bluetooth.device.action.BOND_STATE_CHANGED".equals(actionString) && !"android.bluetooth.adapter.action.STATE_CHANGED".equals(actionString)) {
+                } else if (!BluetoothDevice.ACTION_BOND_STATE_CHANGED.equals(actionString) && !BluetoothAdapter.ACTION_STATE_CHANGED.equals(actionString)) {
                     if (BluetoothConnectionService.INTENT_CONNECTING.equals(actionString)) {
-                        Toast.makeText(SearchActivity.this, new StringBuilder(String.valueOf(SearchActivity.this.connectTo)).append(intent.getStringExtra("deviceName")).toString(), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(SearchActivity.this, new StringBuilder(String.valueOf(SearchActivity.this.connectTo)).append(intent.getStringExtra(BluetoothDevice.EXTRA_NAME)).toString(), Toast.LENGTH_SHORT).show();
                     } else if (BluetoothConnectionService.INTENT_CONNECT_SUCCESS.equals(actionString)) {
                         SearchActivity.this.handleConnectSuccess();
                     } else if (BluetoothConnectionService.INTENT_CONNECT_ERROR.equals(actionString)) {
@@ -205,6 +207,7 @@ public class SearchActivity extends BaseActivity {
             final RadioButton button = (RadioButton) ll.findViewById(R.id.device_cancel_paired);
             button.setFocusable(false);
             button.setOnClickListener(new OnClickListener() {
+                @Override
                 public void onClick(View arg0) {
                     MyAdapter.this.mCurrentButton = button;
                     View layout = ((LayoutInflater) SearchActivity.this.mContext.getSystemService(LAYOUT_INFLATER_SERVICE)).inflate(R.layout.unpaired_dialog, null);
@@ -326,7 +329,7 @@ public class SearchActivity extends BaseActivity {
 
         public View getGroupView(int groupPosition, boolean isExpanded, View convertView, ViewGroup parent) {
             ((ExpandableListView) parent).expandGroup(groupPosition);
-            Log.d(SearchActivity.this.LOG_TAG, "get group view");
+            Log.d(LOG_TAG, "get group view");
             return generateGroupView(groupPosition, parent);
         }
 
@@ -342,7 +345,7 @@ public class SearchActivity extends BaseActivity {
             if (bluetoothDevice != null) {
                 try {
                     Boolean returnValue = (Boolean) bluetoothDevice.getClass().getMethod("removeBond", new Class[0]).invoke(bluetoothDevice, new Object[0]);
-                    Log.i(SearchActivity.this.LOG_TAG, "removeBond return value: " + returnValue);
+                    Log.i(LOG_TAG, "removeBond return value: " + returnValue);
                     if (!returnValue.booleanValue() || this.mUnpairDialog == null) {
                         this.mUnpairDialog.dismiss();
                         View layout = ((LayoutInflater) SearchActivity.this.mContext.getSystemService(LAYOUT_INFLATER_SERVICE)).inflate(R.layout.unpaired_failed_dialog, null);
@@ -406,7 +409,7 @@ public class SearchActivity extends BaseActivity {
         public SearchHandler(SearchActivity activity) {
             this.mActivity = new WeakReference(activity);
         }
-
+        @Override
         public void handleMessage(Message msg) {
             SearchActivity activity = (SearchActivity) this.mActivity.get();
             if (activity != null) {
@@ -480,25 +483,37 @@ public class SearchActivity extends BaseActivity {
         }
     }
 
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView((int) R.layout.bluethooth_config);
+        setContentView(R.layout.bluethooth_config);
+
+        Log.d(this.LOG_TAG, "onCreate");
+
         setActionBarUp();
         getConnectionLost();
+        Log.d(this.LOG_TAG, "onCreat_getConnectionLost");
         this.mContext = this;
         initStringRes();
         setTitle(this.title);
         getSupportActionBar().setTitle(this.title);
+        Log.d(this.LOG_TAG, "onCreat_setTitle");
         if (VERSION.SDK_INT <= 13) {
             getSupportActionBar().setIcon((int) R.drawable.logo1);
         }
         this.mSearchHandler = new SearchHandler(this);
+        Log.d(LOG_TAG, "new SearchHandler");
         if (BluetoothTools.mDevices != null) {
             BluetoothTools.mDevices.clear();
         }
+        Log.d(LOG_TAG, "BluetoothTools.mDevices.clear()");
+        /*
         if (!isEnable()) {
             enableBlueTooth();
         }
+        */
+        Log.d(LOG_TAG, "pass if (!isEnable())");
+        Log.d(this.LOG_TAG, "onCreat_SearchHandler");
         this.mListView = (ExpandableListView) findViewById(R.id.list);
         this.mListView.setGroupIndicator(null);
         this.mNoDataView = (TextView) findViewById(R.id.no_data_view);
@@ -508,6 +523,7 @@ public class SearchActivity extends BaseActivity {
         this.mListView.setAdapter(this.mAdapter);
         updateDataPaired();
         updateList();
+        Log.d(this.LOG_TAG, "onCreat_updateList");
         this.mListView.setOnChildClickListener(new C00891());
         this.mSearchButton = (Button) findViewById(R.id.SearchActivity_Search_button);
         this.mSearchButton.setText(this.startSearch);
@@ -663,10 +679,13 @@ public class SearchActivity extends BaseActivity {
 
     private void setActionBarUp() {
         Intent intent = getIntent();
+        Log.d(this.LOG_TAG, "setActionBarUp");
         if (intent != null) {
             this.mNeedBack = intent.getBooleanExtra(FLAG_NEED_BACK, false);
+            Log.d(this.LOG_TAG, "setActionBarUp_intent != null");
         }
         ActionBar actionBar = getSupportActionBar();
+        Log.d(this.LOG_TAG, "setActionBarUp_getSupportActionBar");
         if (this.mNeedBack) {
             actionBar.setDisplayHomeAsUpEnabled(true);
         } else {
@@ -690,10 +709,10 @@ public class SearchActivity extends BaseActivity {
     private void registBroadcast() {
         this.mBluetoothReceiver = new BluetoothDiagBroadcast();
         this.mFilter = new IntentFilter();
-        this.mFilter.addAction("android.bluetooth.device.action.FOUND");
-        this.mFilter.addAction("android.bluetooth.adapter.action.DISCOVERY_FINISHED");
-        this.mFilter.addAction("android.bluetooth.device.action.BOND_STATE_CHANGED");
-        this.mFilter.addAction("android.bluetooth.device.action.ACL_CONNECTED");
+        this.mFilter.addAction(BluetoothDevice.ACTION_FOUND);
+        this.mFilter.addAction(BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
+        this.mFilter.addAction(BluetoothDevice.ACTION_BOND_STATE_CHANGED);
+        this.mFilter.addAction(BluetoothDevice.ACTION_ACL_CONNECTED);
         this.mFilter.addAction(BluetoothConnectionService.INTENT_CONNECTING);
         this.mFilter.addAction(BluetoothConnectionService.INTENT_CONNECT_SUCCESS);
         this.mFilter.addAction(BluetoothConnectionService.INTENT_CONNECT_ERROR);

@@ -19,24 +19,27 @@ import mig0.bosheculogger.R;
 import mig0.bosheculogger.service.DeviceConnectionManager;
 import mig0.bosheculogger.utils.ConfigManager;
 
-public class LoadActivity extends AppCompatActivity {
+import static android.graphics.PixelFormat.RGBA_8888;
+
+public class LoadActivity extends Activity {
 
     private static final int LOAD_DISPLAY_TIME = 3000;
     protected String LOG_TAG = "loadactivity";
     private Activity mContext;
     protected String mCurrentLanguage;
-    private Set<BluetoothDevice> pairedDevices;
     public SharedPreferences preferences;
+    private BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
+    private Set<BluetoothDevice> pairedDevices;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         this.mContext = this;
-        getWindow().setFormat(1);
+        getWindow().setFormat(RGBA_8888);
         setContentView(R.layout.activity_load);
         // Get language for GUI
         getLanguageSettings();
-        // Get config from *.xml file
+        // Get config from *.xml file, show activity_load's image
         ConfigManager.getInstance(this).loadConfig("diag_cfg_strings.xml");
         RelativeLayout relativeLayout = (RelativeLayout) findViewById(R.id.load);
         if ("zh".equals(this.mCurrentLanguage)) {
@@ -44,7 +47,35 @@ public class LoadActivity extends AppCompatActivity {
         } else {
             relativeLayout.setBackgroundResource(R.drawable.smarthome_light_english);
         }
-        new Handler().postDelayed(new C00821(), 3000);
+
+        final Handler handler = new Handler();
+        /* get paired bluetooth device*/
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                preferences = LoadActivity.this.getSharedPreferences("bosch", MODE_PRIVATE);
+                String bluetoothMAC = preferences.getString("bluetoothMAC", null);
+                if(adapter != null && adapter.isEnabled()) {
+                    pairedDevices = adapter.getDefaultAdapter().getBondedDevices();
+                }
+                if (bluetoothMAC == null || pairedDevices.size() <= 0) {
+                    Intent intent = new Intent(mContext, SearchActivity.class);
+                    startActivityForResult(intent, 0);
+                    return;
+                }
+                boolean paired = false;
+                for (BluetoothDevice bluetoothDevice : pairedDevices) {
+                    if (bluetoothDevice.getAddress().equals(bluetoothMAC)) {
+                        connectDevice(bluetoothDevice);
+                        paired = true;
+                        break;
+                    }
+                }
+                if (!paired) {
+                    LoadActivity.this.mContext.startActivityForResult(new Intent(LoadActivity.this.mContext, SearchActivity.class), 0);
+                }
+            }
+        }, LOAD_DISPLAY_TIME);
     }
 
     private void getLanguageSettings() {
@@ -76,33 +107,6 @@ public class LoadActivity extends AppCompatActivity {
     private void connectDevice(BluetoothDevice device) {
         Log.d(this.LOG_TAG, "load connect device " + device);
         DeviceConnectionManager.getInstance(this).connectDevice(device, new C01242());
-    }
-
-    /*Class load bluetooth eve paired before*/
-    class C00821 implements Runnable {
-        C00821() {
-        }
-
-        public void run() {
-            LoadActivity.this.preferences = LoadActivity.this.getSharedPreferences("bosch", 0);
-            String bluetoothMAC = LoadActivity.this.preferences.getString("bluetoothMAC", null);
-            LoadActivity.this.pairedDevices = BluetoothAdapter.getDefaultAdapter().getBondedDevices();
-            if (bluetoothMAC == null || LoadActivity.this.pairedDevices.size() <= 0) {
-                LoadActivity.this.mContext.startActivityForResult(new Intent(LoadActivity.this.mContext, SearchActivity.class), 0);
-                return;
-            }
-            boolean paired = false;
-            for (BluetoothDevice bluetoothDevice : LoadActivity.this.pairedDevices) {
-                if (bluetoothDevice.getAddress().equals(bluetoothMAC)) {
-                    LoadActivity.this.connectDevice(bluetoothDevice);
-                    paired = true;
-                    break;
-                }
-            }
-            if (!paired) {
-                LoadActivity.this.mContext.startActivityForResult(new Intent(LoadActivity.this.mContext, SearchActivity.class), 0);
-            }
-        }
     }
 
     /*Class call SearchActivity and Listen connect status*/
