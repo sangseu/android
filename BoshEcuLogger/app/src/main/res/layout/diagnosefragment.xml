@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout
+    android:gravity="center"
+    android:orientation="vertical"
+    android:background="@drawable/phone_1136x640"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <TextView
+        android:textSize="25.0sp"
+        android:textColor="#004986"
+        android:layout_gravity="center"
+        android:id="@+id/data_empty_text"
+        android:visibility="invisible"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+    <ExpandableListView
+        android:layout_gravity="center"
+        android:id="@+id/expandableListView1"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:cacheColorHint="#000000"
+        android:groupIndicator="@null"
+        android:childDivider="@drawable/line"
+        android:divider="@drawable/line"
+        android:dividerHeight="1.0dip" />
+</FrameLayout>

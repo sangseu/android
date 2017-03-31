@@ -11,6 +11,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.RelativeLayout;
+import android.widget.Toast;
 
 import java.util.Locale;
 import java.util.Set;
@@ -23,7 +24,7 @@ import static android.graphics.PixelFormat.RGBA_8888;
 
 public class LoadActivity extends Activity {
 
-    private static final int LOAD_DISPLAY_TIME = 1000;
+    private static final int LOAD_DISPLAY_TIME = 2000;
     protected String LOG_TAG = "loadactivity";
     private Activity mContext;
     protected String mCurrentLanguage;
@@ -49,7 +50,8 @@ public class LoadActivity extends Activity {
         }
 
         final Handler handler = new Handler();
-        /* get paired bluetooth device*/
+        Toast.makeText(this.mContext, "Loading component...", Toast.LENGTH_SHORT).show();
+        /* get paired bluetooth device, run after LOAD_DISPLAY_TIME delay*/
         handler.postDelayed(new Runnable() {
             @Override
             public void run() {
@@ -85,6 +87,7 @@ public class LoadActivity extends Activity {
     public void onBackPressed() {
     }
 
+    @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (resultCode == -1) {
             Log.d(this.LOG_TAG, "load got result ok!");
@@ -96,7 +99,7 @@ public class LoadActivity extends Activity {
         super.onActivityResult(requestCode, resultCode, data);
     }
 
-    /*If pass onActivityResult, go to MainActivity*/
+    /* If pass onActivityResult, go to MainActivity*/
     private void gotoMain() {
         //this.mContext.startActivity(new Intent(this.mContext, MainActivity.class));
         Log.d(this.LOG_TAG, "gotoMain");

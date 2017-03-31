@@ -48,7 +48,6 @@ public class ConfigManager {
         return sInstance;
     }
 
-    /*
     public ArrayList<InformationInterface> getAdvancedInformationList()
     {
         return this.mAdvancedInformations;
@@ -73,7 +72,6 @@ public class ConfigManager {
     {
         return this.mSoftwareInfo;
     }
-    */
 
     public String getString(String lan, String id) {
         StringBean sb = (StringBean) this.mStrings.get(id);

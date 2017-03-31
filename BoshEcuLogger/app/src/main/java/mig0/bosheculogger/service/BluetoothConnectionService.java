@@ -13,13 +13,15 @@ import java.lang.ref.WeakReference;
 import java.util.Set;
 
 public class BluetoothConnectionService extends Service {
-    public static final String ACTION_CANCEL = "com.bosch.diag.ACTION_CANCEL";
-    public static final String ACTION_CONNECT = "com.bosch.diag.ACTION_CONNECT";
+    /* user's define*/
+    public static final String ACTION_CANCEL = "mig0.bosheculogger.ACTION_CANCEL";
+    public static final String ACTION_CONNECT = "mig0.bosheculogger.ACTION_CONNECT";
     private static final int CMD_CONNECT = 1;
-    public static final String INTENT_CONNECTING = "com.bosch.diag.CONNECTING";
-    public static final String INTENT_CONNECT_ERROR = "com.bosch.diag.CONNECT_ERROR";
-    public static final String INTENT_CONNECT_SUCCESS = "com.bosch.diag.CONNECT_SUCCESS";
-    private static final String TAG = "BluetoothConnectionService";
+    public static final String INTENT_CONNECTING = "mig0.bosheculogger.CONNECTING";
+    public static final String INTENT_CONNECT_ERROR = "mig0.bosheculogger.CONNECT_ERROR";
+    public static final String INTENT_CONNECT_SUCCESS = "mig0.bosheculogger.CONNECT_SUCCESS";
+    private static final String TAG = "BLTconnectionSerivce";
+    /* user's define*/
     boolean mCanceled;
     private Handler mHandler;
 
@@ -30,6 +32,7 @@ public class BluetoothConnectionService extends Service {
             this.mService = new WeakReference(service);
         }
 
+        @Override
         public void handleMessage(Message msg) {
             if (msg.what == BluetoothConnectionService.CMD_CONNECT) {
                 BluetoothConnectionService service = (BluetoothConnectionService) this.mService.get();
@@ -44,34 +47,13 @@ public class BluetoothConnectionService extends Service {
         }
     }
 
-    /* renamed from: com.bosch.diag.service.BluetoothConnectionService.1 */
-    class C01271 implements ConnectStatusListener {
-        C01271() {
-        }
-
-        public void onConnectSuccess() {
-            Log.d(BluetoothConnectionService.TAG, "onConnectSuccess!");
-            if (!BluetoothConnectionService.this.mCanceled) {
-                BluetoothConnectionService.this.breadcastConnectSuccess();
-            }
-        }
-
-        public void onConnectError() {
-            Log.d(BluetoothConnectionService.TAG, "onConnectError!");
-            if (!BluetoothConnectionService.this.mCanceled) {
-                BluetoothConnectionService.this.boradcastConnectError();
-                BluetoothConnectionService.this.mHandler.sendEmptyMessageDelayed(BluetoothConnectionService.CMD_CONNECT, 1000);
-            }
-        }
-    }
-
     public BluetoothConnectionService() {
         this.mCanceled = false;
     }
 
     private void tryToConnectHistoryDevice() {
         Set<BluetoothDevice> pairedDevices = BluetoothAdapter.getDefaultAdapter().getBondedDevices();
-        String bluetoothMAC = getSharedPreferences("bosch", 0).getString("bluetoothMAC", null);
+        String bluetoothMAC = getSharedPreferences("bosch", MODE_PRIVATE).getString("bluetoothMAC", null);
         BluetoothDevice deviceToConnect = null;
         for (BluetoothDevice bluetoothDevice : pairedDevices) {
             if (bluetoothDevice.getAddress().equals(bluetoothMAC)) {
@@ -87,7 +69,22 @@ public class BluetoothConnectionService extends Service {
     private void connectDecvie(BluetoothDevice device) {
         Log.d(TAG, "try to connect device " + device);
         broadcastConnecting(device);
-        DeviceConnectionManager.getInstance(this).connectDevice(device, new C01271());
+        DeviceConnectionManager.getInstance(this).connectDevice(device, new ConnectStatusListener() {
+            public void onConnectSuccess() {
+                Log.d(BluetoothConnectionService.TAG, "onConnectSuccess!");
+                if (!BluetoothConnectionService.this.mCanceled) {
+                    BluetoothConnectionService.this.breadcastConnectSuccess();
+                }
+            }
+
+            public void onConnectError() {
+                Log.d(BluetoothConnectionService.TAG, "onConnectError!");
+                if (!BluetoothConnectionService.this.mCanceled) {
+                    BluetoothConnectionService.this.boradcastConnectError();
+                    BluetoothConnectionService.this.mHandler.sendEmptyMessageDelayed(1, 1000);
+                }
+            }
+        });
     }
 
     private void broadcastConnecting(BluetoothDevice device) {
@@ -112,17 +109,20 @@ public class BluetoothConnectionService extends Service {
         return null;
     }
 
+    @Override
     public void onCreate() {
         Log.i(TAG, "Service onCreate");
         this.mHandler = new ServiceHandler(this);
         super.onCreate();
     }
 
+    @Override
     public void onDestroy() {
         Log.i(TAG, "Service onDestroy");
         super.onDestroy();
     }
 
+    @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         String action = intent.getAction();
         Log.d(TAG, "service got action : " + action);

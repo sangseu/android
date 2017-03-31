@@ -2,7 +2,6 @@ package mig0.bosheculogger.activity;
 
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.AppCompatActivity;
 
 import java.util.Locale;
@@ -16,6 +15,7 @@ public class BaseActivity extends AppCompatActivity {
         this.LOG_TAG = getClass().getSimpleName();
     }
 
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         getLanguageSettings();

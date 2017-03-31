@@ -96,7 +96,8 @@ public class SearchActivity extends BaseActivity {
     private String unpairTitle = "";
     private String waitContent;
     private String waitTitle;
-    protected String LOG_TAG = "search_activity";
+    protected String LOG_TAG = "SearchActivity";
+    public String LOG_SUB = "SearchActivity_sub";
 
     private class BluetoothDiagBroadcast extends BroadcastReceiver {
         private BluetoothDiagBroadcast() {
@@ -306,7 +307,7 @@ public class SearchActivity extends BaseActivity {
         }
 
         private String getCurrentConnectDevice() {
-            return SearchActivity.this.getSharedPreferences("bosch", 0).getString("bluetoothMAC", null);
+            return SearchActivity.this.getSharedPreferences("bosch", MODE_PRIVATE).getString("bluetoothMAC", null);
         }
 
         public int getChildrenCount(int group_position) {
@@ -430,22 +431,6 @@ public class SearchActivity extends BaseActivity {
         }
     }
 
-    /* renamed from: com.bosch.diag.activity.SearchActivity.5 */
-    class C01265 implements ConnectStatusListener {
-        C01265() {
-        }
-
-        public void onConnectSuccess() {
-            SearchActivity.this.hideWaitDialog();
-            SearchActivity.this.handleConnectSuccess();
-        }
-
-        public void onConnectError() {
-            SearchActivity.this.hideWaitDialog();
-            SearchActivity.this.mSearchHandler.sendEmptyMessage(SearchActivity.CMD_SHOW_CONNECT_ERROR);
-        }
-    }
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -490,6 +475,7 @@ public class SearchActivity extends BaseActivity {
         Log.d(this.LOG_TAG, "onCreat_pass mAdapter");
         //updateList();
         Log.d(this.LOG_TAG, "onCreat_pass updateList");
+        /* on Click to select a device to connect*/
         this.mListView.setOnChildClickListener(new OnChildClickListener() {
             @Override
             public boolean onChildClick(ExpandableListView parent, View v, int groupPosition, int childPosition, long id) {
@@ -503,11 +489,13 @@ public class SearchActivity extends BaseActivity {
         });
         Log.d(this.LOG_TAG, "onCreat_setOnChildClickListener");
 
+        /* setting search button */
         this.mSearchButton = (Button) findViewById(R.id.SearchActivity_Search_button);
         this.mSearchButton.setText(this.startSearch);
         this.mSearchButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View arg0) {
+                // if button.text is SCAN -> start SearchActivity
                 if (SearchActivity.this.mSearchButton.getText().equals(SearchActivity.this.startSearch)) {
                     SearchActivity.this.mFoundDevice.deviceList.clear();
                     BluetoothTools.mDevices.clear();
@@ -517,8 +505,11 @@ public class SearchActivity extends BaseActivity {
                         SearchActivity.this.mAnimationDrawable.start();
                     }
                     SearchActivity.this.mSearchButton.setText(SearchActivity.this.stopSearch);
-                } else if (SearchActivity.this.mSearchButton.getText().equals(SearchActivity.this.stopSearch)) {
+                }
+                // if button.text is STOP -> stopfindDevice()
+                else if (SearchActivity.this.mSearchButton.getText().equals(SearchActivity.this.stopSearch)) {
                     SearchActivity.this.stopfindDevice();
+                    Log.d(LOG_SUB, "onCreat_pass onClick STOP");
                     SearchActivity.this.mSearchButton.setText(SearchActivity.this.startSearch);
                 }
             }
@@ -556,7 +547,7 @@ public class SearchActivity extends BaseActivity {
     protected void onStart() {
         super.onStart();
         //startDiscovery();
-        Log.d(this.LOG_TAG, "onCreat_pass onStart");
+        Log.d(this.LOG_TAG, "onCreat_pass startDiscovery");
         if (this.mSearchButton != null) {
             this.mSearchButton.setText(this.stopSearch);
         }
@@ -596,40 +587,23 @@ public class SearchActivity extends BaseActivity {
             this.mAdapter.notifyDataSetChanged();
             this.mAdapter.dismissAlertDialog();
         }
+        Log.d(this.LOG_TAG, "onStop_pass stopfindDevice()");
         if (this.mAnimationDrawable != null && this.mAnimationDrawable.isRunning()) {
             stopfindDevice();
         }
     }
 
+    @Override
     public Intent getSupportParentActivityIntent() {
         Log.d(this.LOG_TAG, "getSupportParentActivityIntent");
         finish();
         return super.getSupportParentActivityIntent();
     }
 
+    @Override
     public boolean onSupportNavigateUp() {
         Log.d(this.LOG_TAG, "onSupportNavigateUp");
         return super.onSupportNavigateUp();
-    }
-
-    /* renamed from: com.bosch.diag.activity.SearchActivity.3 */
-    class C00913 implements DialogInterface.OnClickListener {
-        C00913() {
-        }
-
-        public void onClick(DialogInterface dialog, int whichButton) {
-            SearchActivity.this.finish();
-        }
-    }
-
-    /* renamed from: com.bosch.diag.activity.SearchActivity.4 */
-    class C00924 implements DialogInterface.OnClickListener {
-        C00924() {
-        }
-
-        public void onClick(DialogInterface dialog, int whichButton) {
-            dialog.dismiss();
-        }
     }
 
     public void onBackPressed() {
@@ -640,8 +614,18 @@ public class SearchActivity extends BaseActivity {
         Builder builder = new Builder(this);
         builder.setTitle(this.exitTitle);
         builder.setMessage(this.exitMessage);
-        builder.setPositiveButton(this.exitOk, new C00913());
-        builder.setNegativeButton(this.exitCancel, new C00924());
+        builder.setPositiveButton(this.exitOk, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int whichButton) {
+                SearchActivity.this.finish();
+            }
+        });
+        builder.setNegativeButton(this.exitCancel, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int whichButton) {
+                dialog.dismiss();
+            }
+        });
         AlertDialog dialog = builder.create();
         dialog.setCanceledOnTouchOutside(false);
         dialog.show();
@@ -649,8 +633,19 @@ public class SearchActivity extends BaseActivity {
 
     private void connectDecvie(BluetoothDevice device) {
         showWaitDialog();
-        DeviceConnectionManager.getInstance(this).connectDevice(device, new C01265());
+        DeviceConnectionManager.getInstance(this).connectDevice(device, new ConnectStatusListener() {
+            public void onConnectSuccess() {
+                SearchActivity.this.hideWaitDialog();
+                SearchActivity.this.handleConnectSuccess();
+            }
+
+            public void onConnectError() {
+                SearchActivity.this.hideWaitDialog();
+                SearchActivity.this.mSearchHandler.sendEmptyMessage(SearchActivity.CMD_SHOW_CONNECT_ERROR);
+            }
+        });
     }
+
 
     private void handleConnectSuccess() {
         Log.d(this.LOG_TAG, "set result ok!");
@@ -720,21 +715,16 @@ public class SearchActivity extends BaseActivity {
         registerReceiver(this.mBluetoothReceiver, this.mFilter);
     }
 
-
-    /* renamed from: com.bosch.diag.activity.SearchActivity.6 */
-    class C00936 implements Runnable {
-        C00936() {
-        }
-
-        public void run() {
-            SearchActivity.this.mAnimationDrawable.start();
-        }
-    }
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.settings, menu);
         ImageView button = (ImageView) ((LinearLayout) MenuItemCompat.getActionView(menu.findItem(R.id.action_progressbar_refresh))).findViewById(R.id.button_settings);
         this.mAnimationDrawable = (AnimationDrawable) button.getBackground();
-        button.post(new C00936());
+        button.post(new Runnable() {
+            @Override
+            public void run() {
+                SearchActivity.this.mAnimationDrawable.start();
+            }
+        });
         this.mSearchButton.setText(this.stopSearch);
         return true;
     }
@@ -817,12 +807,14 @@ public class SearchActivity extends BaseActivity {
     }
 
     protected void stopfindDevice() {
+        /*
         BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
         boolean discovering = adapter.isDiscovering();
         Log.i(this.LOG_TAG, "BluetoothAdapter isDiscovering=" + discovering);
         if (discovering) {
             adapter.cancelDiscovery();
         }
+        */
         if (this.mAnimationDrawable.isRunning()) {
             this.mAnimationDrawable.stop();
             this.mSearchButton.setText(this.startSearch);
