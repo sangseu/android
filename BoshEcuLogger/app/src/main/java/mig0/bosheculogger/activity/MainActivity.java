@@ -2,10 +2,17 @@ package mig0.bosheculogger.activity;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.DialogInterface.OnClickListener;
+import android.content.DialogInterface.OnKeyListener;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.graphics.Color;
 import android.graphics.drawable.AnimationDrawable;
+import android.os.Build;
 import android.os.Handler;
 import android.os.HandlerThread;
+import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
@@ -17,17 +24,27 @@ import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.os.Message;
+import android.util.TypedValue;
+import android.view.KeyEvent;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
 
+import java.io.IOException;
 import java.lang.ref.WeakReference;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
 
+import mig0.bosheculogger.R;
 import mig0.bosheculogger.service.BluetoothConnectionService;
 import mig0.bosheculogger.service.DeviceConnectionManager;
+import mig0.bosheculogger.utils.BluetoothTools;
 import mig0.bosheculogger.utils.Command;
 import mig0.bosheculogger.utils.ConfigManager;
 import mig0.bosheculogger.utils.ConfigManager.Strings;
+import mig0.bosheculogger.utils.Hex2StringUtils;
+import mig0.viewpager.PagerSlidingTabStrip;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -75,14 +92,43 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        Log.e(LOG_TAG, "Main onCreate");
+        setContentView((int) R.layout.activity_main);
+        getLanguageSettings();
+        updateTitle(this.mCurrentLanguage);
+        if (Build.VERSION.SDK_INT <= 13) {
+            getSupportActionBar().setIcon((int) R.drawable.logo1);
+        }
+        this.mMainHandler = new MainHandler(this);
+        this.mWorkThread = new HandlerThread("work");
+        this.mWorkThread.start();
+        this.mWorkHandler = new Handler(this.mWorkThread.getLooper()) {
+            public void handleMessage(Message msg) {
+                if (msg.what == MainActivity.CMD_WRITE) {
+                    Bundle data = msg.getData();
+                    if (data != null) {
+                        MainActivity.this.mDeviceConnectionManager.writeObject(data.getByteArray("cmd"));
+                    }
+                }
+                super.handleMessage(msg);
+            }
+        };
+        this.mDeviceConnectionManager = DeviceConnectionManager.getInstance(this);
+        Log.d(LOG_TAG, "connection manager code = " + this.mDeviceConnectionManager.hashCode());
+        this.dm = getResources().getDisplayMetrics();
+        this.mViewPager = (ViewPager) findViewById(R.id.pager);
+        this.tabs = (PagerSlidingTabStrip) findViewById(R.id.tabs);
+        this.mPagerAdapter = new MyPagerAdapter(getSupportFragmentManager(), this.mCurrentLanguage);
+        this.mViewPager.setAdapter(this.mPagerAdapter);
+        this.tabs.setViewPager(this.mViewPager);
+        setTabsValue();
+        this.mReceiver = new ConnectionBroadcastReceiver();
     }
 
     @Override
     protected void onStop() {
         Log.i(LOG_TAG, "in onStop");
-        /*
         this.hasHandShaked = false;
-        */
         super.onStop();
     }
 
@@ -90,10 +136,35 @@ public class MainActivity extends AppCompatActivity {
     protected void onResume() {
         Log.e(LOG_TAG, "in onResume");
         super.onResume();
-        /*
         registerBroadcastReceiver();
-        */
         start();
+    }
+
+    @Override
+    protected void onPause() {
+        Log.e(LOG_TAG, "in onPause");
+        this.mPause = true;
+        cleanMessage();
+        unregisterBroadcastReceiver();
+        Intent intent = new Intent(this, BluetoothConnectionService.class);
+        intent.setAction(BluetoothConnectionService.ACTION_CANCEL);
+        sendBroadcast(intent);
+        if (this.mDialogUnsupport != null && this.mDialogUnsupport.isShowing()) {
+            this.mDialogUnsupport.dismiss();
+            this.mDialogUnsupport = null;
+        }
+        super.onPause();
+    }
+
+    @Override
+    protected void onDestroy() {
+        Log.e(LOG_TAG, "main onDestory");
+        this.mDeviceConnectionManager.clear();
+        BluetoothTools.cmdArray.clear();
+        cleanMessage();
+        this.mWorkHandler.removeMessages(CMD_WRITE);
+        this.mWorkThread.quit();
+        super.onDestroy();
     }
 
     private void start() {
@@ -110,23 +181,6 @@ public class MainActivity extends AppCompatActivity {
         */
     }
 
-    @Override
-    protected void onPause() {
-        Log.e(LOG_TAG, "in onPause");
-        /*
-        this.mPause = true;
-        cleanMessage();
-        unregisterBroadcastReceiver();
-        Intent intent = new Intent(this, BluetoothConnectionService.class);
-        intent.setAction(BluetoothConnectionService.ACTION_CANCEL);
-        sendBroadcast(intent);
-        if (this.mDialogUnsupport != null && this.mDialogUnsupport.isShowing()) {
-            this.mDialogUnsupport.dismiss();
-            this.mDialogUnsupport = null;
-        }
-        */
-        super.onPause();
-    }
 
     static class MainHandler extends Handler {
         WeakReference<MainActivity> mActivity;
@@ -197,6 +251,264 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    private void stopAnimation() {
+        if (this.mRunningAnimation != null) {
+            Log.i(LOG_TAG, "stopAnimation");
+            this.mRunningAnimation.stop();
+            this.mRunningAnimation.selectDrawable(0);
+        }
+    }
+
+    private void showMessage(String messageId) {
+        Toast.makeText(this, ConfigManager.getInstance(this).getString(this.mCurrentLanguage, messageId), Toast.LENGTH_LONG).show();
+    }
+
+    private void startAnimation() {
+        if (this.mRunningAnimation != null && !this.mRunningAnimation.isRunning()) {
+            this.mRunningAnimation.start();
+        }
+    }
+
+    private void handleMessageRead(String messageRead) {
+        if (this.mPause) {
+            Log.e(LOG_TAG, "activity pause return");
+            return;
+        }
+        startAnimation();
+        List<String> cmdArray = new ArrayList();
+        for (int i = 0; i < messageRead.length(); i += 2) {
+            cmdArray.add(messageRead.substring(i, i + 2));
+        }
+        String statusCode = (String) cmdArray.get(0);
+        Log.i(LOG_TAG, "statusCode:" + statusCode);
+        if ("3D".equals(statusCode) && this.hasHandShaked) {
+            retry(Strings.WRONG_PACKAGE);
+        } else if ("2F".equals(statusCode)) {
+            retry(Strings.TIMEOUT);
+        } else if ("2A".equals(statusCode)) {
+            this.mRetry = 0;
+            int intCheckSum = 0;
+            cmdArray.remove(0);
+            String checkSumTemp = (String) cmdArray.get(cmdArray.size() - 1);
+            Log.i(LOG_TAG, "from server checkSum:" + checkSumTemp);
+            cmdArray.remove(cmdArray.size() - 1);
+            for (String str : cmdArray) {
+                intCheckSum += Integer.valueOf(Hex2StringUtils.toHexOctal(str)).intValue();
+            }
+            String oracl2Hex = Integer.toHexString(intCheckSum);
+            Log.i(LOG_TAG, "original calced checkSum:" + oracl2Hex);
+            int beginIndex = oracl2Hex.length() - 2;
+            if (beginIndex < 0) {
+                beginIndex = 0;
+            }
+            String checkSum = oracl2Hex.substring(beginIndex);
+            Log.i(LOG_TAG, "calced checkSum:" + checkSumTemp);
+            if (!checkSum.equalsIgnoreCase(checkSumTemp)) {
+                retry(Strings.DATA_VALIDATE_ERROR);
+            }
+            if (cmdArray.size() == 61) {
+                handleStatusMessage(cmdArray);
+            } else if (cmdArray.size() == 4 || cmdArray.size() == 6) {
+                handleControlMessage(cmdArray);
+            }
+        }
+    }
+
+    private void handleStatusMessage(List<String> cmdArray) {
+        BluetoothTools.cmdArray = cmdArray;
+        updateFragments();
+        this.mMainHandler.sendEmptyMessageDelayed(CMD_REQUEST_STATUS_MESSAGE, (long) ConfigManager.getInstance().requestInterval());
+    }
+
+    private void updateFragments() {
+        if (this.basicFragment != null) {
+            this.basicFragment.updateView();
+        } else {
+            Log.e(LOG_TAG, "basic fragment == null");
+        }
+        if (this.seniorFragment != null) {
+            this.seniorFragment.updateView();
+        }
+        if (this.diagnoseFragment != null) {
+            this.diagnoseFragment.updateView();
+        }
+    }
+
+    private void handleControlMessage(List<String> cmdArray) {
+        Log.i(LOG_TAG, "got control message + " + cmdArray);
+        if (this.mRequstIndex == 0) {
+            BluetoothTools.serialArray = cmdArray;
+        } else if (this.mRequstIndex == 1) {
+            BluetoothTools.softwareArray = cmdArray;
+            List<String> softwareArray = BluetoothTools.softwareArray;
+            if (softwareArray == null || softwareArray.size() != 6) {
+                retry(Strings.GET_SOFTWARE_ERROR);
+                return;
+            }
+            String softwareee = (String) softwareArray.get(1);
+            String softwaredd = (String) softwareArray.get(2);
+            String softwareff = Hex2StringUtils.toHexOctal((String) softwareArray.get(0));
+            softwareee = Hex2StringUtils.toHexOctal(softwareee);
+            String fullName = "v" + softwareff + "." + softwareee + "." + Hex2StringUtils.toHexOctal(softwaredd);
+            String secondName = "v" + softwareff + "." + softwareee + ".*";
+            String thirdName = "v+\\d+\\.+" + softwareee + "+\\.+\\d";
+            String matchFile = matchConfig(fullName);
+            if (matchFile == null) {
+                matchFile = matchConfig(secondName);
+            }
+            if (matchFile == null) {
+                matchFile = matchConfig(thirdName);
+            }
+            if (matchFile != null) {
+                ConfigManager.getInstance(this).loadConfig(matchFile);
+                calCmdString();
+            } else {
+                stopAnimation();
+                showExitDialog(ConfigManager.getInstance(this).getString(this.mCurrentLanguage, Strings.TITLE_PROMPT), ConfigManager.getInstance(this).getString(this.mCurrentLanguage, Strings.CONTENT_UNAVAILABLE_CONTROLLER));
+                return;
+            }
+        } else if (this.mRequstIndex == 2) {
+            BluetoothTools.hardwareArray = cmdArray;
+        }
+        this.mRequstIndex++;
+        if (this.mRequstIndex < 3) {
+            this.mMainHandler.sendEmptyMessage(CMD_REQUEST_CONTROL_MESSAGE);
+        } else {
+            this.mMainHandler.sendEmptyMessage(CMD_REQUEST_STATUS_MESSAGE);
+        }
+    }
+
+    private String matchConfig(String version) {
+        String fullName = "diag_cfg_" + version + ".xml";
+        boolean matched = false;
+        String matchedFile = null;
+        try {
+            String[] fileList = getAssets().list("");
+            for (String file : fileList) {
+                if (file.matches(fullName)) {
+                    matched = true;
+                    matchedFile = file;
+                    break;
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        Log.d(LOG_TAG, "match config " + fullName + " result " + matched + " matchedFile: " + matchedFile);
+        return matchedFile;
+    }
+
+    private void showExitDialog(String title, String message) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        String ok = ConfigManager.getInstance(this).getString(this.mCurrentLanguage, Strings.BT_OK);
+        builder.setTitle(title);
+        builder.setMessage(message);
+        builder.setPositiveButton(ok, new OnClickListener() {
+            public void onClick(DialogInterface dialog, int whichButton) {
+                MainActivity.this.finish();
+            }
+        });
+        builder.setOnKeyListener(new OnKeyListener() {
+            public boolean onKey(DialogInterface dialog, int keyCode, KeyEvent event) {
+                if (keyCode == 4) {
+                    return true;
+                }
+                return false;
+            }
+        });
+        mDialogUnsupport = builder.create();
+        mDialogUnsupport.setCanceledOnTouchOutside(false);
+        mDialogUnsupport.show();
+    }
+
+    private synchronized void retry(String reasonId) {
+        if (this.mRetry >= 4) {
+            stopAnimation();
+        }
+        Log.e(LOG_TAG, "retry reason = " + reasonId);
+        if (this.mRequstIndex < 3) {
+            requestControlMessage();
+        } else {
+            requestStatusMessage();
+        }
+        this.mRetry++;
+    }
+
+    private void requestControlMessage() {
+        if (this.mConnectionLost) {
+            Log.e(LOG_TAG, "connection lost requestControlMessage return!");
+            return;
+        }
+        byte[] data;
+        if (this.mRequstIndex == 0) {
+            data = Hex2StringUtils.hexStringToByte("5204FF55");
+            Log.d(LOG_TAG, "request serial No");
+            sendCmdToECU(data);
+        } else if (this.mRequstIndex == 1) {
+            data = Hex2StringUtils.hexStringToByte("5206FE56");
+            Log.d(LOG_TAG, "request software info");
+            sendCmdToECU(data);
+        } else if (this.mRequstIndex == 2) {
+            data = Hex2StringUtils.hexStringToByte("5206FD55");
+            Log.d(LOG_TAG, "request hardware info");
+            sendCmdToECU(data);
+        }
+        this.mMainHandler.sendEmptyMessageDelayed(CMD_REQUEST_RETURN_TIMEOUT, 200);
+    }
+
+    private void requestStatusMessage() {
+        if (this.mConnectionLost) {
+            Log.e(LOG_TAG, "connection lost requestStatusMessage return!");
+            return;
+        }
+        byte[] data = Hex2StringUtils.hexStringToByte(this.mCmdString);
+        Log.d(LOG_TAG, "3.requset status message");
+        sendCmdToECU(data);
+        this.mMainHandler.sendEmptyMessageDelayed(CMD_REQUEST_RETURN_TIMEOUT, 200);
+    }
+
+    private void cleanMessage() {
+        this.mMainHandler.removeMessages(CMD_REQUEST_CONTROL_MESSAGE);
+        this.mMainHandler.removeMessages(CMD_REQUEST_STATUS_MESSAGE);
+        this.mMainHandler.removeMessages(CMD_REQUEST_RETURN_TIMEOUT);
+        this.mMainHandler.removeMessages(CMD_HANDSHAKE_TIMEOUT);
+        this.mMainHandler.removeMessages(MESSAGE_READ_OBJECT);
+        this.mRequstIndex = 0;
+        this.mRetry = 0;
+        this.mHandshakeRetry = 0;
+        this.hasHandShaked = false;
+    }
+
+    private void sendCmdToECU(byte[] cmd) {
+        Message msg = this.mWorkHandler.obtainMessage(CMD_WRITE);
+        Bundle data = new Bundle();
+        data.putByteArray("cmd", cmd);
+        msg.setData(data);
+        this.mWorkHandler.sendMessage(msg);
+    }
+
+    private void handShake() {
+        if (this.mConnectionLost) {
+            Log.e(LOG_TAG, "connection lost handShake return!");
+            return;
+        }
+        byte[] data_handshake = Hex2StringUtils.hexStringToByte("3F");
+        Log.d(LOG_TAG, "1.send handshake");
+        sendCmdToECU(data_handshake);
+        this.mMainHandler.sendEmptyMessageDelayed(CMD_HANDSHAKE_TIMEOUT, 500);
+    }
+
+    private void handshakeRetry() {
+        if (this.mHandshakeRetry >= 3) {
+            showMessage(Strings.HANDSHAKE_ERROR);
+            return;
+        }
+        Log.e(LOG_TAG, "handshake time out retry!");
+        handShake();
+        this.mHandshakeRetry++;
+    }
+
+
     public class MyPagerAdapter extends FragmentPagerAdapter {
         private String[] titles;
 
@@ -213,14 +525,19 @@ public class MainActivity extends AppCompatActivity {
             this.titles = new String[]{diagnostic, basic, advanced};
         }
 
+        @Override
         public CharSequence getPageTitle(int position) {
             return this.titles[position];
         }
 
+        /* // Returns total number of pages */
+        @Override
         public int getCount() {
             return this.titles.length;
         }
 
+        /* Returns the fragment to display for that page */
+        @Override
         public Fragment getItem(int position) {
             Log.e(MainActivity.LOG_TAG, "get fragment " + position);
             Bundle args;
@@ -254,13 +571,15 @@ public class MainActivity extends AppCompatActivity {
             }
         }
 
+        @Override
         public Object instantiateItem(ViewGroup container, int position) {
             Log.i(MainActivity.LOG_TAG, "adapter instantiateItem " + position);
             return super.instantiateItem(container, position);
         }
 
+        @Override
         public int getItemPosition(Object object) {
-            return -2;
+            return POSITION_NONE; /* -2 */
         }
     }
 
@@ -283,14 +602,46 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-
-    private void calCmdString()
-    {
+    private void calCmdString() {
         Command localCommand = ConfigManager.getInstance(this).getReadStatusCmd();
         String str = Integer.toHexString(Integer.parseInt(localCommand.cmd, 16) + Integer.parseInt(localCommand.length, 16) + Integer.parseInt(localCommand.id, 16));
         str = str.substring(str.length() - 2);
         this.mCmdString = (localCommand.cmd + localCommand.length + localCommand.id + str);
     }
 
+    private void getLanguageSettings() {
+        this.mCurrentLanguage = PreferenceManager.getDefaultSharedPreferences(this).getString("language", Locale.getDefault().getLanguage());
+    }
+
+    private void updateTitle(String lan) {
+        CharSequence title = ConfigManager.getInstance(this).getString(lan, Strings.TITLE_MAIN);
+        setTitle(title);
+        getSupportActionBar().setTitle(title);
+    }
+
+    private void setTabsValue() {
+        this.tabs.setShouldExpand(true);
+        this.tabs.setUnderlineHeight((int) TypedValue.applyDimension(1, 1.0f, this.dm));
+        this.tabs.setIndicatorHeight((int) TypedValue.applyDimension(1, 4.0f, this.dm));
+        this.tabs.setTextSize((int) TypedValue.applyDimension(2, 18.0f, this.dm));
+        this.tabs.setIndicatorColor(Color.parseColor("#029bec"));
+        this.tabs.setSelectedTextColor(Color.parseColor("#39c0ff"));
+        this.tabs.setTextColor(Color.parseColor("#004986"));
+        this.tabs.setTabBackground(0);
+        this.tabs.setBackgroundColor(Color.parseColor("#d4e4f3"));
+        this.tabs.setDividerColor(Color.parseColor("#004986"));
+    }
+
+    private void registerBroadcastReceiver() {
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(BluetoothConnectionService.INTENT_CONNECTING);
+        filter.addAction(BluetoothConnectionService.INTENT_CONNECT_SUCCESS);
+        filter.addAction(BluetoothConnectionService.INTENT_CONNECT_ERROR);
+        registerReceiver(this.mReceiver, filter);
+    }
+
+    private void unregisterBroadcastReceiver() {
+        unregisterReceiver(this.mReceiver);
+    }
 
 }

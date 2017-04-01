@@ -24,8 +24,11 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".activity.MainActivity">
-        </activity>
+            android:theme="@style/Theme.AppCompat.Light.BlueActionBar"
+            android:name=".activity.MainActivity"
+            android:screenOrientation="portrait"
+            android:configChanges="locale"
+            android:logo="@drawable/logo1" />
         <activity
             android:theme="@style/Theme.AppCompat.Light.BlueActionBar"
             android:name=".activity.SearchActivity"

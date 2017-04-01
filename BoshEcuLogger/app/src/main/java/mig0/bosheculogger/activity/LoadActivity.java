@@ -89,6 +89,8 @@ public class LoadActivity extends Activity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        /* original */
+        /*
         if (resultCode == -1) {
             Log.d(this.LOG_TAG, "load got result ok!");
             gotoMain();
@@ -96,17 +98,25 @@ public class LoadActivity extends Activity {
             Log.d(this.LOG_TAG, "load got result canceled!");
             finish();
         }
+        */
+
+        /* FAKE_OK to go to main */
+        if (resultCode == 0) {
+            Log.d(this.LOG_TAG, "despite canceled, go to main ");
+            gotoMain();
+        }
+
         super.onActivityResult(requestCode, resultCode, data);
     }
 
     /* If pass onActivityResult, go to MainActivity*/
     private void gotoMain() {
-        //this.mContext.startActivity(new Intent(this.mContext, MainActivity.class));
+        this.mContext.startActivity(new Intent(this.mContext, MainActivity.class));
         Log.d(this.LOG_TAG, "gotoMain");
         finish();
     }
 
-    /*Connect if had paired device before*/
+    /* Connect if had paired device before */
     private void connectDevice(BluetoothDevice device) {
         Log.d(this.LOG_TAG, "load connect device " + device);
         DeviceConnectionManager.getInstance(this).connectDevice(device, new C01242());
