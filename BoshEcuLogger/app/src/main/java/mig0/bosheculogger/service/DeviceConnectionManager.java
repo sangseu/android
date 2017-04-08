@@ -11,6 +11,9 @@ import mig0.bosheculogger.service.BluetoothCommunThread.DataCallbackListener;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+
+import static android.content.Context.MODE_PRIVATE;
 
 public class DeviceConnectionManager {
     private static DeviceConnectionManager sInstance;
@@ -21,77 +24,69 @@ public class DeviceConnectionManager {
     private Context mContext;
     private BluetoothDevice mCurrentDevice;
 
-    /* renamed from: com.bosch.diag.service.DeviceConnectionManager.1 */
-    class C01011 extends Thread {
-        private final /* synthetic */ BluetoothDevice val$device;
+    private class createSocket extends Thread {
+        private final BluetoothDevice bluetoothDevice;
+        private final BluetoothSocket bluetoothSocket;
 
-        C01011(BluetoothDevice bluetoothDevice) {
-            this.val$device = bluetoothDevice;
+        private createSocket(BluetoothDevice device) {
+            this.bluetoothDevice = device;
+            BluetoothSocket tmp = null;
+            try{
+                Method m = device.getClass().getMethod("createRfcommSocket", new Class[]{int.class});
+                tmp = (BluetoothSocket)m.invoke(device, 1);
+            }catch (SecurityException e) {
+                Log.e(LOG_TAG, "create() failed", e);
+            } catch (NoSuchMethodException e) {
+                Log.e(LOG_TAG, "create() failed", e);
+            } catch (IllegalArgumentException e) {
+                Log.e(LOG_TAG, "create() failed", e);
+            } catch (IllegalAccessException e) {
+                Log.e(LOG_TAG, "create() failed", e);
+            } catch (InvocationTargetException e) {
+                Log.e(LOG_TAG, "create() failed", e);
+            }
+            bluetoothSocket = tmp;
         }
 
+        @Override
         public void run() {
-            /*
             try
             {
-                Log.d(DeviceConnectionManager.this.LOG_TAG, "try to create new device socket");
-                BluetoothSocket localBluetoothSocket = (BluetoothSocket)paramBluetoothDevice.getClass().getMethod("createRfcommSocket", new Class[] { Integer.TYPE }).invoke(paramBluetoothDevice, new Object[] { Integer.valueOf(1) });
-                localBluetoothSocket.connect();
+                bluetoothSocket.connect();
                 try
                 {
                     if ((DeviceConnectionManager.this.mConnectionSocket != null) && (DeviceConnectionManager.this.isSocketConnect()))
                     {
-                        Log.i(DeviceConnectionManager.this.LOG_TAG, "close preview device " + DeviceConnectionManager.this.mCurrentDevice);
+                        Log.i(LOG_TAG, "close preview device " + DeviceConnectionManager.this.mCurrentDevice);
                         DeviceConnectionManager.this.mBluetoothCommunThread.streamFlush();
                         DeviceConnectionManager.this.mConnectionSocket.close();
                     }
-                    DeviceConnectionManager.this.mConnectionSocket = localBluetoothSocket;
-                    DeviceConnectionManager.this.mCurrentDevice = paramBluetoothDevice;
+                    DeviceConnectionManager.this.mConnectionSocket = bluetoothSocket;
+                    DeviceConnectionManager.this.mCurrentDevice = bluetoothDevice;
                     DeviceConnectionManager.this.saveBluetooth(false);
                     if (DeviceConnectionManager.this.mConnectStatusListener != null)
                     {
-                        Log.d(DeviceConnectionManager.this.LOG_TAG, "create socket successful");
+                        Log.d(LOG_TAG, "create socket successful");
                         DeviceConnectionManager.this.mConnectStatusListener.onConnectSuccess();
                         return;
                     }
                 }
-                catch (IOException localIOException2)
+                catch (IOException e)
                 {
-                    for (;;)
-                    {
-                        localIOException2.printStackTrace();
-                    }
+                    Log.i(LOG_TAG, "Connect unsuccess.", e);
                 }
                 return;
             }
-            catch (IOException localIOException1)
+            catch (IOException e)
             {
-                localIOException1.printStackTrace();
+                e.printStackTrace();
                 if (DeviceConnectionManager.this.mConnectStatusListener != null)
                 {
                     DeviceConnectionManager.this.mConnectStatusListener.onConnectError();
+                    Log.d(LOG_TAG, "Unable to connect.", e);
                     return;
                 }
             }
-            catch (NoSuchMethodException localNoSuchMethodException)
-            {
-                localNoSuchMethodException.printStackTrace();
-                return;
-            }
-            catch (IllegalAccessException localIllegalAccessException)
-            {
-                localIllegalAccessException.printStackTrace();
-                return;
-            }
-            catch (IllegalArgumentException localIllegalArgumentException)
-            {
-                localIllegalArgumentException.printStackTrace();
-                return;
-            }
-            catch (InvocationTargetException localInvocationTargetException)
-            {
-                localInvocationTargetException.printStackTrace();
-            }
-            */
         }
     }
 
@@ -118,7 +113,7 @@ public class DeviceConnectionManager {
 
     private void createSocket(BluetoothDevice device) {
         if (device != null) {
-            new C01011(device).start();
+            new  createSocket(device).start();
         }
     }
 
@@ -173,7 +168,7 @@ public class DeviceConnectionManager {
     }
 
     private void saveBluetooth(boolean clear) {
-        Editor editor = this.mContext.getSharedPreferences("bosch", 0).edit();
+        Editor editor = this.mContext.getSharedPreferences("bosch", MODE_PRIVATE).edit();
         if (clear) {
             editor.putString("bluetoothNAME", "");
             editor.putString("bluetoothMAC", "");

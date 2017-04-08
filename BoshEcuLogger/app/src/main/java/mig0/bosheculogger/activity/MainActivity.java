@@ -37,6 +37,7 @@ import java.util.List;
 import java.util.Locale;
 
 import mig0.bosheculogger.R;
+import mig0.bosheculogger.service.BluetoothCommunThread;
 import mig0.bosheculogger.service.BluetoothConnectionService;
 import mig0.bosheculogger.service.DeviceConnectionManager;
 import mig0.bosheculogger.utils.BluetoothTools;
@@ -48,12 +49,20 @@ import mig0.viewpager.PagerSlidingTabStrip;
 
 public class MainActivity extends AppCompatActivity {
 
+    private static String handshake_ecu_response    = "21";
+    private static String repuest_serial_no         = "5204FF55";
+    private static String request_software_info     = "5206FE56";
+    private static String request_hardware_info     = "5206FD55";
+
+    private static int max_handshake_retry = 3;
+    private static int max_request_retry = 4;
+
     private static final int CMD_HANDSHAKE_TIMEOUT = 1004;
     private static final int CMD_REQUEST_CONTROL_MESSAGE = 1002;
     private static final int CMD_REQUEST_RETURN_TIMEOUT = 1003;
     private static final int CMD_REQUEST_STATUS_MESSAGE = 1001;
 
-    public static final int ANIM_STYLE_CLOSE_ENTER = 3;
+    public static final int MESSAGE_CONNECT_ERROR = 3;
     public static final int MESSAGE_READ_OBJECT = 4;
     public static final int MESSAGE_CONNECT_LOST = 5;
 
@@ -63,24 +72,24 @@ public class MainActivity extends AppCompatActivity {
 
     private static final int CMD_WRITE = 10005;
     private static final int HANDSHAKE_TIMEOUT = 500;
-    private static String LOG_TAG = null;
+    private static String LOG_TAG = "MainActivity";
     private static final int REQUSET_TIMEOUT = 200;
     private BasicFragment basicFragment;
     private DiagnoseFragment diagnoseFragment;
     private DisplayMetrics dm;
-    private boolean hasHandShaked;
-    private String mCmdString;
-    public boolean mConnectionLost;
+    private boolean hasHandShaked = false;
+    private String mCmdString; /* read from *.xml is C0 3D 06 xx */
+    public boolean mConnectionLost = false;
     private String mCurrentLanguage;
     private DeviceConnectionManager mDeviceConnectionManager;
     private AlertDialog mDialogUnsupport;
-    private int mHandshakeRetry;
+    private int mHandshakeRetry = 0;
     private MainHandler mMainHandler;
     private MyPagerAdapter mPagerAdapter;
-    private boolean mPause;
+    private boolean mPause = false;
     private ConnectionBroadcastReceiver mReceiver;
-    private int mRequstIndex;
-    private int mRetry;
+    private int mRequstIndex = 0;
+    private int mRetry = 0;
     private AnimationDrawable mRunningAnimation;
     private ViewPager mViewPager;
     private Handler mWorkHandler;
@@ -100,9 +109,12 @@ public class MainActivity extends AppCompatActivity {
             getSupportActionBar().setIcon((int) R.drawable.logo1);
         }
         this.mMainHandler = new MainHandler(this);
+        /*start thread that has a lopper*/
         this.mWorkThread = new HandlerThread("work");
         this.mWorkThread.start();
         this.mWorkHandler = new Handler(this.mWorkThread.getLooper()) {
+            /* couple Override and super */
+            @Override
             public void handleMessage(Message msg) {
                 if (msg.what == MainActivity.CMD_WRITE) {
                     Bundle data = msg.getData();
@@ -168,17 +180,44 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void start() {
-        /*
         this.mPause = false;
         this.mConnectionLost = false;
         if (this.mDeviceConnectionManager.isSocketLost()) {
-            this.mMainHandler.sendEmptyMessage(5);
+            this.mMainHandler.sendEmptyMessage(MESSAGE_CONNECT_LOST);/*5*/
             return;
         }
-        this.mDeviceConnectionManager.startCommuThread(new C01252());
+        this.mDeviceConnectionManager.startCommuThread(new BluetoothCommunThread.DataCallbackListener() {
+            public void onReadObject(String message) {
+                Log.d(MainActivity.LOG_TAG, " Main read + " + message);
+                MainActivity.this.mMainHandler.removeMessages(MainActivity.CMD_REQUEST_RETURN_TIMEOUT);
+                Message msg = MainActivity.this.mMainHandler.obtainMessage();
+                msg.what = MESSAGE_READ_OBJECT; /*4*/
+                msg.obj = message;
+                msg.sendToTarget();
+            }
+
+            public void onConnectionLost() {
+                Log.i(MainActivity.LOG_TAG, "onConnectionLost");
+                MainActivity.this.mMainHandler.sendEmptyMessage(MESSAGE_CONNECT_LOST); /*5*/
+            }
+
+            public void onConnectionError() {
+                Log.i(MainActivity.LOG_TAG, "onConnectionError");
+                MainActivity.this.mMainHandler.sendEmptyMessage(MESSAGE_CONNECT_ERROR); /*3*/
+            }
+
+            public void onSocketNullException() {
+                Log.i(MainActivity.LOG_TAG, "onSocketNullException");
+                MainActivity.this.finish();
+            }
+
+            public void onSocketClosedException() {
+                Log.i(MainActivity.LOG_TAG, "onSocketClosedException");
+                MainActivity.this.mMainHandler.sendEmptyMessage(MESSAGE_CONNECT_ERROR); /*3*/
+            }
+        });
         this.mDeviceConnectionManager.resetThreadFlag();
         handShake();
-        */
     }
 
 
@@ -186,16 +225,16 @@ public class MainActivity extends AppCompatActivity {
         WeakReference<MainActivity> mActivity;
 
         public MainHandler(MainActivity activity) {
-            this.mActivity = new WeakReference(activity);
+            mActivity = new WeakReference(activity);
         }
 
         /* handle message from handshake with ecu */
         public void handleMessage(Message msg) {
-            MainActivity activity = (MainActivity) this.mActivity.get();
+            MainActivity activity = mActivity.get();
             if (activity != null) {
                 switch (msg.what) {
-                    case MainActivity.ANIM_STYLE_CLOSE_ENTER:
-                    case MainActivity.MESSAGE_CONNECT_LOST:
+                    case MainActivity.MESSAGE_CONNECT_ERROR:/*3*/
+                    case MainActivity.MESSAGE_CONNECT_LOST:/*5*/
                         Log.d(MainActivity.LOG_TAG, "MainHandler case MESSAGE_CONNECT_LOST");
                         activity.stopAnimation();
                         if (!activity.mPause) {
@@ -207,10 +246,10 @@ public class MainActivity extends AppCompatActivity {
                         clearMessageQueue();
                         activity.mConnectionLost = true;
                         return;
-                    case MainActivity.MESSAGE_READ_OBJECT:
+                    case MainActivity.MESSAGE_READ_OBJECT:/*4*/
                         Log.d(MainActivity.LOG_TAG, "MainHandler case MESSAGE_READ_OBJECT");
                         String messageRead = msg.obj.toString();
-                        if ("21".equals(messageRead)) {
+                        if (handshake_ecu_response.equals(messageRead)) {
                             Log.d(MainActivity.LOG_TAG, "1.handshake success!");
                             activity.hasHandShaked = true;
                             activity.mHandshakeRetry = 0;
@@ -255,11 +294,12 @@ public class MainActivity extends AppCompatActivity {
         if (this.mRunningAnimation != null) {
             Log.i(LOG_TAG, "stopAnimation");
             this.mRunningAnimation.stop();
-            this.mRunningAnimation.selectDrawable(0);
+            this.mRunningAnimation.selectDrawable(0);/*stop animation, go to child 0*/
         }
     }
 
     private void showMessage(String messageId) {
+        /*get messahe in current language and show Toast*/
         Toast.makeText(this, ConfigManager.getInstance(this).getString(this.mCurrentLanguage, messageId), Toast.LENGTH_LONG).show();
     }
 
@@ -276,6 +316,7 @@ public class MainActivity extends AppCompatActivity {
         }
         startAnimation();
         List<String> cmdArray = new ArrayList();
+        /* read 2 char in HEX format -> 1 byte data */
         for (int i = 0; i < messageRead.length(); i += 2) {
             cmdArray.add(messageRead.substring(i, i + 2));
         }
@@ -293,7 +334,7 @@ public class MainActivity extends AppCompatActivity {
             Log.i(LOG_TAG, "from server checkSum:" + checkSumTemp);
             cmdArray.remove(cmdArray.size() - 1);
             for (String str : cmdArray) {
-                intCheckSum += Integer.valueOf(Hex2StringUtils.toHexOctal(str)).intValue();
+                intCheckSum += Integer.valueOf(Hex2StringUtils.toHexOctal(str));
             }
             String oracl2Hex = Integer.toHexString(intCheckSum);
             Log.i(LOG_TAG, "original calced checkSum:" + oracl2Hex);
@@ -306,17 +347,30 @@ public class MainActivity extends AppCompatActivity {
             if (!checkSum.equalsIgnoreCase(checkSumTemp)) {
                 retry(Strings.DATA_VALIDATE_ERROR);
             }
+            /* when handshake ok, ecu send 2 ControlMessage to app
+            * app need parse 2 ControlMessage to do some thing then communicate
+            * with ecu using handleStatusMessage */
+            /* got status message */
             if (cmdArray.size() == 61) {
                 handleStatusMessage(cmdArray);
-            } else if (cmdArray.size() == 4 || cmdArray.size() == 6) {
+            }
+            /* got control message */
+            else if (cmdArray.size() == 4 || cmdArray.size() == 6) {
                 handleControlMessage(cmdArray);
             }
         }
     }
 
     private void handleStatusMessage(List<String> cmdArray) {
+        /* send message to parser */
         BluetoothTools.cmdArray = cmdArray;
+        /* update all value
+        * it link to get_x_InformationList() in ConfigManager.java to get data*/
         updateFragments();
+        /* *
+        * default interval/delay is 150
+        * frequency send request to ecu
+        * */
         this.mMainHandler.sendEmptyMessageDelayed(CMD_REQUEST_STATUS_MESSAGE, (long) ConfigManager.getInstance().requestInterval());
     }
 
@@ -334,8 +388,12 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    /* handle ControlMessage
+    * if cmdArray reiceive match cfg_v255.6.1 version
+    * then load data structure from cfg_v255.6.1.xml file
+    * After get 2 ControlMessage, goto handle StatusMessage*/
     private void handleControlMessage(List<String> cmdArray) {
-        Log.i(LOG_TAG, "got control message + " + cmdArray);
+        Log.i(LOG_TAG, "got control message " + cmdArray);
         if (this.mRequstIndex == 0) {
             BluetoothTools.serialArray = cmdArray;
         } else if (this.mRequstIndex == 1) {
@@ -422,7 +480,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private synchronized void retry(String reasonId) {
-        if (this.mRetry >= 4) {
+        if (this.mRetry >= max_request_retry) {
             stopAnimation();
         }
         Log.e(LOG_TAG, "retry reason = " + reasonId);
@@ -441,15 +499,15 @@ public class MainActivity extends AppCompatActivity {
         }
         byte[] data;
         if (this.mRequstIndex == 0) {
-            data = Hex2StringUtils.hexStringToByte("5204FF55");
+            data = Hex2StringUtils.hexStringToByte(repuest_serial_no);
             Log.d(LOG_TAG, "request serial No");
             sendCmdToECU(data);
         } else if (this.mRequstIndex == 1) {
-            data = Hex2StringUtils.hexStringToByte("5206FE56");
+            data = Hex2StringUtils.hexStringToByte(request_software_info);
             Log.d(LOG_TAG, "request software info");
             sendCmdToECU(data);
         } else if (this.mRequstIndex == 2) {
-            data = Hex2StringUtils.hexStringToByte("5206FD55");
+            data = Hex2StringUtils.hexStringToByte(request_hardware_info);
             Log.d(LOG_TAG, "request hardware info");
             sendCmdToECU(data);
         }
@@ -499,7 +557,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void handshakeRetry() {
-        if (this.mHandshakeRetry >= 3) {
+        if (this.mHandshakeRetry >= max_handshake_retry) {
             showMessage(Strings.HANDSHAKE_ERROR);
             return;
         }
@@ -539,9 +597,10 @@ public class MainActivity extends AppCompatActivity {
         /* Returns the fragment to display for that page */
         @Override
         public Fragment getItem(int position) {
-            Log.e(MainActivity.LOG_TAG, "get fragment " + position);
+            Log.e(MainActivity.LOG_TAG, "on fragment: " + position);
             Bundle args;
             switch (position) {
+                /* parse information using data in cmdArray and form in *.xml file  */
                 case DIANOGE_FRAGMENT /*0*/:
                     if (MainActivity.this.diagnoseFragment == null) {
                         MainActivity.this.diagnoseFragment = new DiagnoseFragment();
@@ -603,10 +662,14 @@ public class MainActivity extends AppCompatActivity {
 
 
     private void calCmdString() {
-        Command localCommand = ConfigManager.getInstance(this).getReadStatusCmd();
-        String str = Integer.toHexString(Integer.parseInt(localCommand.cmd, 16) + Integer.parseInt(localCommand.length, 16) + Integer.parseInt(localCommand.id, 16));
-        str = str.substring(str.length() - 2);
+        Log.i(LOG_TAG, "on_calCmd");
+        Command localCommand = ConfigManager.getInstance(this).getReadStatusCmd(); /*from *.xml file: cmd:C0 length:3D id:06*/
+        Log.i(LOG_TAG, "on_calCmd localCommand + " + localCommand.cmd);
+        String str = Integer.toHexString((Integer.parseInt(localCommand.cmd, 16) + Integer.parseInt(localCommand.length, 16)) + Integer.parseInt(localCommand.id, 16));
+        Log.i(LOG_TAG, "on_calCmd str + " + str);
+        str = str.substring(str.length() - 2);/* C03D06 length = 6, 6-2 = 4. -> 06*/
         this.mCmdString = (localCommand.cmd + localCommand.length + localCommand.id + str);
+        Log.i(LOG_TAG, "passed calCmd");
     }
 
     private void getLanguageSettings() {

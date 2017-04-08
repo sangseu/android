@@ -36,16 +36,17 @@ public class LoadActivity extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         this.mContext = this;
-        getWindow().setFormat(RGBA_8888);
+        getWindow().setFormat(RGBA_8888); /*1*/
         setContentView(R.layout.activity_load);
         // Get language for GUI
         getLanguageSettings();
         // Get config from *.xml file, show activity_load's image
         ConfigManager.getInstance(this).loadConfig("diag_cfg_strings.xml");
         RelativeLayout relativeLayout = (RelativeLayout) findViewById(R.id.load);
+        /* chinese background */
         if ("zh".equals(this.mCurrentLanguage)) {
             relativeLayout.setBackgroundResource(R.drawable.smarthome_light_chinese);
-        } else {
+        } else { /* eng background */
             relativeLayout.setBackgroundResource(R.drawable.smarthome_light_english);
         }
 
@@ -55,7 +56,7 @@ public class LoadActivity extends Activity {
         handler.postDelayed(new Runnable() {
             @Override
             public void run() {
-                preferences = LoadActivity.this.getSharedPreferences("bosch", MODE_PRIVATE);
+                preferences = LoadActivity.this.getSharedPreferences("bosch", MODE_PRIVATE); /*0*/
                 String bluetoothMAC = preferences.getString("bluetoothMAC", null);
                 if(adapter != null && adapter.isEnabled()) {
                     pairedDevices = adapter.getDefaultAdapter().getBondedDevices();
@@ -80,6 +81,24 @@ public class LoadActivity extends Activity {
         }, LOAD_DISPLAY_TIME);
     }
 
+    /* Connect if had paired device before */
+    private void connectDevice(BluetoothDevice device) {
+        Log.d(LOG_TAG, "load connect device " + device);
+        DeviceConnectionManager.getInstance(this).connectDevice(device, new DeviceConnectionManager.ConnectStatusListener() {
+            public void onConnectSuccess() {
+                Log.d(LOG_TAG, "load connect success");
+                LoadActivity.this.gotoMain();
+            }
+
+            public void onConnectError() {
+                Log.d(LOG_TAG, "load connect error");
+                Intent searchIntent = new Intent(LoadActivity.this, SearchActivity.class);
+                searchIntent.putExtra(SearchActivity.FLAG_CONNECTION_LOST, true);
+                LoadActivity.this.mContext.startActivityForResult(searchIntent, 0);
+            }
+        });
+    }
+
     private void getLanguageSettings() {
         this.mCurrentLanguage = PreferenceManager.getDefaultSharedPreferences(this).getString("language", Locale.getDefault().getLanguage());
     }
@@ -89,55 +108,21 @@ public class LoadActivity extends Activity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        /* original */
-        /*
-        if (resultCode == -1) {
-            Log.d(this.LOG_TAG, "load got result ok!");
+        /* requestCode for check which request is responding */
+        if (resultCode == RESULT_OK) { /*-1*/
+            Log.d(LOG_TAG, "load got result ok!");
             gotoMain();
-        } else if (resultCode == 0) {
-            Log.d(this.LOG_TAG, "load got result canceled!");
+        } else if (resultCode == RESULT_CANCELED) { /*0*/
+            Log.d(LOG_TAG, "load got result canceled!");
             finish();
         }
-        */
-
-        /* FAKE_OK to go to main */
-        if (resultCode == 0) {
-            Log.d(this.LOG_TAG, "despite canceled, go to main ");
-            gotoMain();
-        }
-
         super.onActivityResult(requestCode, resultCode, data);
     }
 
     /* If pass onActivityResult, go to MainActivity*/
     private void gotoMain() {
         this.mContext.startActivity(new Intent(this.mContext, MainActivity.class));
-        Log.d(this.LOG_TAG, "gotoMain");
+        Log.d(LOG_TAG, "gotoMain");
         finish();
-    }
-
-    /* Connect if had paired device before */
-    private void connectDevice(BluetoothDevice device) {
-        Log.d(this.LOG_TAG, "load connect device " + device);
-        DeviceConnectionManager.getInstance(this).connectDevice(device, new C01242());
-    }
-
-    /*Class call SearchActivity and Listen connect status*/
-    //!!!!!!!!!!!!!!!!!! need check DeviceConnectionManager.ConnectStatusListener
-    class C01242 implements DeviceConnectionManager.ConnectStatusListener {
-        C01242() {
-        }
-
-        public void onConnectSuccess() {
-            Log.d(LoadActivity.this.LOG_TAG, "load connect success");
-            LoadActivity.this.gotoMain();
-        }
-
-        public void onConnectError() {
-            Log.d(LoadActivity.this.LOG_TAG, "load connect error");
-            Intent searchIntent = new Intent(LoadActivity.this, SearchActivity.class);
-            searchIntent.putExtra(SearchActivity.FLAG_CONNECTION_LOST, true);
-            LoadActivity.this.mContext.startActivityForResult(searchIntent, 0);
-        }
     }
 }

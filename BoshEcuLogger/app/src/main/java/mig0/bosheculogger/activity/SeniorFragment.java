@@ -68,6 +68,7 @@ public class SeniorFragment extends BaseFragment {
         }
     }
 
+    @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
     }

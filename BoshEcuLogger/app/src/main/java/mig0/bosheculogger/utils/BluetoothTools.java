@@ -7,26 +7,17 @@ import java.util.List;
 import java.util.UUID;
 
 public class BluetoothTools {
-    public static String LOG_TAG = null;
+    public static String LOG_TAG = "BluetoothTools";
     public static final int MESSAGE_CONNECT_ERROR = 3;
     public static final int MESSAGE_CONNECT_LOST = 5;
     public static final int MESSAGE_READ_OBJECT = 4;
-    public static final UUID PRIVATE_UUID;
-    public static List<String> cmdArray;
-    public static List<String> hardwareArray;
-    public static List<BluetoothDevice> mDevices;
-    public static List<String> serialArray;
-    public static List<String> softwareArray;
-
-    static {
-        LOG_TAG = "BluetoothTools";
-        PRIVATE_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
-        mDevices = new ArrayList();
-        cmdArray = new ArrayList();
-        softwareArray = new ArrayList();
-        serialArray = new ArrayList();
-        hardwareArray = new ArrayList();
-    }
+    public static final UUID PRIVATE_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
+    /* cmdArray contain 61 bytes data received */
+    public static List<String> cmdArray = new ArrayList();
+    public static List<String> hardwareArray = new ArrayList();
+    public static List<BluetoothDevice> mDevices = new ArrayList();
+    public static List<String> serialArray = new ArrayList();
+    public static List<String> softwareArray = new ArrayList();
 
     public static String getSerialInfo() {
         if (serialArray == null || serialArray.size() == 0) {

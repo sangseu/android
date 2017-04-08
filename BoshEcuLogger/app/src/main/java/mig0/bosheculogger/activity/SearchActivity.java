@@ -49,6 +49,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Set;
 
+import static android.provider.Settings.ACTION_BLUETOOTH_SETTINGS;
 
 
 public class SearchActivity extends BaseActivity {
@@ -115,7 +116,7 @@ public class SearchActivity extends BaseActivity {
                     }
                     if (!(bluetoothDevice == null || TextUtils.isEmpty(bluetoothDevice.getName()) || BluetoothTools.mDevices.contains(bluetoothDevice))) {
                         BluetoothTools.mDevices.add(bluetoothDevice);
-                        Log.i(SearchActivity.this.LOG_TAG, "devcie size" + BluetoothTools.mDevices.size());
+                        Log.i(SearchActivity.this.LOG_TAG, "device size" + BluetoothTools.mDevices.size());
                     }
                     if (BluetoothTools.mDevices.size() > 0) {
                         message = new Message();
@@ -248,7 +249,7 @@ public class SearchActivity extends BaseActivity {
                         }
                     });
                     Builder builder = new Builder(SearchActivity.this);
-                    //radioButton2 = button; //!!!!!!!!!!!!! need check
+                    //radioButton2 = button; //!!!!!!!!!!!!! need check if it's needed
                     builder.setOnKeyListener(new OnKeyListener() {
                         public boolean onKey(DialogInterface dialog, int keyCode, KeyEvent event) {
                             if (event.getAction() == 1 && keyCode == 4) {
@@ -376,7 +377,7 @@ public class SearchActivity extends BaseActivity {
                         unpairFailedDialog.show();
                         okBtn.setOnClickListener(new OnClickListener() {
                             public void onClick(View view) {
-                                Intent i = new Intent("android.settings.BLUETOOTH_SETTINGS");
+                                Intent i = new Intent(ACTION_BLUETOOTH_SETTINGS);
                                 if (i != null) {
                                     SearchActivity.this.mContext.startActivity(i);
                                 }
@@ -455,13 +456,10 @@ public class SearchActivity extends BaseActivity {
             BluetoothTools.mDevices.clear();
         }
         Log.d(LOG_TAG, "BluetoothTools.mDevices.clear()");
-        /*
         if (!isEnable()) {
             enableBlueTooth();
         }
-        */
         Log.d(LOG_TAG, "pass if (!isEnable())");
-        Log.d(this.LOG_TAG, "onCreat_SearchHandler");
         this.mListView = (ExpandableListView) findViewById(R.id.list);
         this.mListView.setGroupIndicator(null);
         this.mNoDataView = (TextView) findViewById(R.id.no_data_view);
@@ -471,9 +469,9 @@ public class SearchActivity extends BaseActivity {
         this.mAdapter = new MyAdapter(this.mContext, this.groups);
         Log.d(this.LOG_TAG, "onCreat_after mAdapter");
         this.mListView.setAdapter(this.mAdapter);
-        //updateDataPaired();
+        updateDataPaired();
         Log.d(this.LOG_TAG, "onCreat_pass mAdapter");
-        //updateList();
+        updateList();
         Log.d(this.LOG_TAG, "onCreat_pass updateList");
         /* on Click to select a device to connect*/
         this.mListView.setOnChildClickListener(new OnChildClickListener() {
@@ -487,7 +485,7 @@ public class SearchActivity extends BaseActivity {
                 return true;
             }
         });
-        Log.d(this.LOG_TAG, "onCreat_setOnChildClickListener");
+        Log.d(this.LOG_TAG, "onCreat_pass setOnChildClickListener");
 
         /* setting search button */
         this.mSearchButton = (Button) findViewById(R.id.SearchActivity_Search_button);
@@ -495,7 +493,7 @@ public class SearchActivity extends BaseActivity {
         this.mSearchButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View arg0) {
-                // if button.text is SCAN -> start SearchActivity
+                /* if button.text is SCAN -> start SearchActivity */
                 if (SearchActivity.this.mSearchButton.getText().equals(SearchActivity.this.startSearch)) {
                     SearchActivity.this.mFoundDevice.deviceList.clear();
                     BluetoothTools.mDevices.clear();
@@ -506,7 +504,7 @@ public class SearchActivity extends BaseActivity {
                     }
                     SearchActivity.this.mSearchButton.setText(SearchActivity.this.stopSearch);
                 }
-                // if button.text is STOP -> stopfindDevice()
+                /* if button.text is STOP -> stopfindDevice() */
                 else if (SearchActivity.this.mSearchButton.getText().equals(SearchActivity.this.stopSearch)) {
                     SearchActivity.this.stopfindDevice();
                     Log.d(LOG_SUB, "onCreat_pass onClick STOP");
@@ -546,7 +544,7 @@ public class SearchActivity extends BaseActivity {
     @Override
     protected void onStart() {
         super.onStart();
-        //startDiscovery();
+        startDiscovery();
         Log.d(this.LOG_TAG, "onCreat_pass startDiscovery");
         if (this.mSearchButton != null) {
             this.mSearchButton.setText(this.stopSearch);
@@ -807,14 +805,12 @@ public class SearchActivity extends BaseActivity {
     }
 
     protected void stopfindDevice() {
-        /*
         BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
         boolean discovering = adapter.isDiscovering();
         Log.i(this.LOG_TAG, "BluetoothAdapter isDiscovering=" + discovering);
         if (discovering) {
             adapter.cancelDiscovery();
         }
-        */
         if (this.mAnimationDrawable.isRunning()) {
             this.mAnimationDrawable.stop();
             this.mSearchButton.setText(this.startSearch);

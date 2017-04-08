@@ -13,7 +13,7 @@ import java.lang.ref.WeakReference;
 import java.util.Set;
 
 public class BluetoothConnectionService extends Service {
-    /* user's define*/
+    /* !!! user's define*/
     public static final String ACTION_CANCEL = "mig0.bosheculogger.ACTION_CANCEL";
     public static final String ACTION_CONNECT = "mig0.bosheculogger.ACTION_CONNECT";
     private static final int CMD_CONNECT = 1;
@@ -21,7 +21,7 @@ public class BluetoothConnectionService extends Service {
     public static final String INTENT_CONNECT_ERROR = "mig0.bosheculogger.CONNECT_ERROR";
     public static final String INTENT_CONNECT_SUCCESS = "mig0.bosheculogger.CONNECT_SUCCESS";
     private static final String TAG = "BLTconnectionSerivce";
-    /* user's define*/
+    /* !!! user's define*/
     boolean mCanceled;
     private Handler mHandler;
 
