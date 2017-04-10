@@ -5,7 +5,7 @@
     <string id="software_version" en="App Version" zh="应用程序版本"/>
     <string id="config_version" en="Parameter Version" zh="配置文件版本"/>
     <string id="bt_config" en="Bluetooth setting" zh="蓝牙设置"/>
-    <string id="repair_guide" en="FAQ" zh="维修指南"/>
+    <string id="repair_guide" en="Help" zh="维修指南"/>
     <string id="pdf_no_app" en="No Application Found For Viewing PDF" zh="找不到可以打开pdf的程序"/>
     <string id="faq_not_found" en="FAQ pdf Not Found" zh="找不到维修指南pdf"/>
     <!-- 帮助界面字符串 end -->
@@ -29,11 +29,11 @@
     <string id="wait" en="wait" zh="等待"/>
     <string id="wait_content" en="connect to device,please wait!" zh="正在连接设备，请等待！"/>
     <string id="device_connect_error" en="device connect error,please check if device in use" zh="设备连接失败，请检查设备是否被占用"/>
-    <string id="unpair_title" en="Unpaired" zh="取消配对"></string>
+    <string id="unpair_title" en="Unpaired" zh="取消配对"/>
     <string id="unpair_message" en="Are you sure to unpair the bluetooth device?" zh="您确定取消配对此蓝牙设备?"/>
-    <string id="unpair_failed_title" en="Unpair failed" zh="取消配对失败"></string>
+    <string id="unpair_failed_title" en="Unpair failed" zh="取消配对失败"/>
     <string id="unpair_failed_message" en="Unpair device failed, are you sure to navigative to system bluetooth settings?"
-        zh="取消配对失败，您确认是否导航到系统蓝牙设置界面?"></string>
+        zh="取消配对失败，您确认是否导航到系统蓝牙设置界面?"/>
     <string id="unpair_posbtn" en="Yes" zh="是"/>
     <string id="unpair_navbtn" en="Cancel" zh="否"/>
     <string id="no_fault" en="No Fault" zh="没有故障"/>
@@ -52,4 +52,9 @@
     <string id="already_connect" en="already connect" zh="已连接"/>
     <string id="connect_to" en="connecting to " zh="正在连接到"/>
     <string id="connect_fail" en="connect fail" zh="连接失败"/>
+
+    <!-- Help dialog -->
+    <string id="help_title" en="Help" zh="Trợ giúp"/>
+    <string id="help_mess" en="Please contact PEGA R&amp;D department." zh="Vui lòng liên hệ phòng Sản phẩm PEGA"/>
+
 </bosch>

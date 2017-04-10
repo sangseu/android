@@ -13,17 +13,17 @@ public class BaseInformation implements InformationInterface {
         if ("zh".equals(this.lan)) {
             return this.nameZh;
         }
-        return this.nameEn;
+        return nameEn;
     }
 
     public String getValue() {
-        if ("Software Info".equals(this.nameEn)) {
+        if ("Software Info".equals(nameEn)) {
             return BluetoothTools.getSoftwareInfo();
         }
-        if ("Hardware Info".equals(this.nameEn)) {
+        if ("Hardware Info".equals(nameEn)) {
             return BluetoothTools.getHardwareInfo();
         }
-        if ("Serial No".equals(this.nameEn)) {
+        if ("Serial No".equals(nameEn)) {
             return BluetoothTools.getSerialInfo();
         }
         return null;

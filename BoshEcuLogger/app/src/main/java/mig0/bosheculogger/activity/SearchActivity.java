@@ -101,8 +101,6 @@ public class SearchActivity extends BaseActivity {
     public String LOG_SUB = "SearchActivity_sub";
 
     private class BluetoothDiagBroadcast extends BroadcastReceiver {
-        private BluetoothDiagBroadcast() {
-        }
         @Override
         public void onReceive(Context ctx, Intent intent) {
             if (intent != null) {
@@ -121,11 +119,11 @@ public class SearchActivity extends BaseActivity {
                     if (BluetoothTools.mDevices.size() > 0) {
                         message = new Message();
                         message.what = SearchActivity.CMD_DEVICE_FOUND;
-                        SearchActivity.this.mSearchHandler.sendMessage(message);
+                        mSearchHandler.sendMessage(message);
                     }
                 } else if (BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(actionString)) {
-                    SearchActivity.this.mAnimationDrawable.stop();
-                    SearchActivity.this.mSearchButton.setText(SearchActivity.this.startSearch);
+                    mAnimationDrawable.stop();
+                    mSearchButton.setText(startSearch);
                     if (BluetoothTools.mDevices.isEmpty()) {
                         message = new Message();
                         message.what = SearchActivity.CMD_NO_DEVICE_FOUND;
@@ -442,37 +440,31 @@ public class SearchActivity extends BaseActivity {
         setActionBarUp();
         getConnectionLost();
         Log.d(this.LOG_TAG, "onCreat_getConnectionLost");
-        this.mContext = this;
+        mContext = this;
         initStringRes();
-        setTitle(this.title);
-        getSupportActionBar().setTitle(this.title);
+        Log.d(this.LOG_TAG, "onCreat_" + title);
+        setTitle(title);
+        getSupportActionBar().setTitle(title);
         Log.d(this.LOG_TAG, "onCreat_setTitle");
         if (VERSION.SDK_INT <= 13) {
             getSupportActionBar().setIcon((int) R.drawable.logo1);
         }
         this.mSearchHandler = new SearchHandler(this);
-        Log.d(LOG_TAG, "new SearchHandler");
         if (BluetoothTools.mDevices != null) {
             BluetoothTools.mDevices.clear();
         }
-        Log.d(LOG_TAG, "BluetoothTools.mDevices.clear()");
         if (!isEnable()) {
             enableBlueTooth();
         }
-        Log.d(LOG_TAG, "pass if (!isEnable())");
         this.mListView = (ExpandableListView) findViewById(R.id.list);
         this.mListView.setGroupIndicator(null);
         this.mNoDataView = (TextView) findViewById(R.id.no_data_view);
         this.mPairedDevice.name = this.pairedDevice;
         this.mFoundDevice.name = this.foundDevice;
-        Log.d(this.LOG_TAG, "onCreat_mAdapter");
         this.mAdapter = new MyAdapter(this.mContext, this.groups);
-        Log.d(this.LOG_TAG, "onCreat_after mAdapter");
         this.mListView.setAdapter(this.mAdapter);
         updateDataPaired();
-        Log.d(this.LOG_TAG, "onCreat_pass mAdapter");
         updateList();
-        Log.d(this.LOG_TAG, "onCreat_pass updateList");
         /* on Click to select a device to connect*/
         this.mListView.setOnChildClickListener(new OnChildClickListener() {
             @Override
@@ -485,30 +477,29 @@ public class SearchActivity extends BaseActivity {
                 return true;
             }
         });
-        Log.d(this.LOG_TAG, "onCreat_pass setOnChildClickListener");
 
         /* setting search button */
-        this.mSearchButton = (Button) findViewById(R.id.SearchActivity_Search_button);
-        this.mSearchButton.setText(this.startSearch);
-        this.mSearchButton.setOnClickListener(new OnClickListener() {
+        mSearchButton = (Button) findViewById(R.id.SearchActivity_Search_button);
+        mSearchButton.setText(startSearch);
+        mSearchButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View arg0) {
                 /* if button.text is SCAN -> start SearchActivity */
-                if (SearchActivity.this.mSearchButton.getText().equals(SearchActivity.this.startSearch)) {
-                    SearchActivity.this.mFoundDevice.deviceList.clear();
+                if (mSearchButton.getText().equals(startSearch)) {
+                    mFoundDevice.deviceList.clear();
                     BluetoothTools.mDevices.clear();
-                    SearchActivity.this.updateList();
-                    SearchActivity.this.startDiscovery();
-                    if (!SearchActivity.this.mAnimationDrawable.isRunning()) {
-                        SearchActivity.this.mAnimationDrawable.start();
+                    updateList();
+                    startDiscovery();
+                    if (!mAnimationDrawable.isRunning()) {
+                        mAnimationDrawable.start();
                     }
-                    SearchActivity.this.mSearchButton.setText(SearchActivity.this.stopSearch);
+                    mSearchButton.setText(stopSearch);
                 }
                 /* if button.text is STOP -> stopfindDevice() */
-                else if (SearchActivity.this.mSearchButton.getText().equals(SearchActivity.this.stopSearch)) {
-                    SearchActivity.this.stopfindDevice();
+                else if (SearchActivity.this.mSearchButton.getText().equals(stopSearch)) {
+                    stopfindDevice();
                     Log.d(LOG_SUB, "onCreat_pass onClick STOP");
-                    SearchActivity.this.mSearchButton.setText(SearchActivity.this.startSearch);
+                    mSearchButton.setText(startSearch);
                 }
             }
         });
@@ -517,7 +508,7 @@ public class SearchActivity extends BaseActivity {
 
     private void initStringRes() {
         ConfigManager cManager = ConfigManager.getInstance(this.mContext);
-        this.title = cManager.getString(this.mCurrentLanguage, Strings.BT_CONFIG);
+        title = cManager.getString(mCurrentLanguage, Strings.BT_CONFIG);
         this.pairedDevice = cManager.getString(this.mCurrentLanguage, Strings.BT_PAIRED_DEVICE);
         this.foundDevice = cManager.getString(this.mCurrentLanguage, Strings.BT_FOUND_DEVICE);
         this.startSearch = cManager.getString(this.mCurrentLanguage, Strings.START_SEARCH);
@@ -605,20 +596,20 @@ public class SearchActivity extends BaseActivity {
     }
 
     public void onBackPressed() {
-        if (this.mNeedBack) {
+        if (mNeedBack) {
             finish();
             return;
         }
         Builder builder = new Builder(this);
-        builder.setTitle(this.exitTitle);
-        builder.setMessage(this.exitMessage);
-        builder.setPositiveButton(this.exitOk, new DialogInterface.OnClickListener() {
+        builder.setTitle(exitTitle);
+        builder.setMessage(exitMessage);
+        builder.setPositiveButton(exitOk, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int whichButton) {
                 SearchActivity.this.finish();
             }
         });
-        builder.setNegativeButton(this.exitCancel, new DialogInterface.OnClickListener() {
+        builder.setNegativeButton(exitCancel, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int whichButton) {
                 dialog.dismiss();
@@ -639,7 +630,7 @@ public class SearchActivity extends BaseActivity {
 
             public void onConnectError() {
                 SearchActivity.this.hideWaitDialog();
-                SearchActivity.this.mSearchHandler.sendEmptyMessage(SearchActivity.CMD_SHOW_CONNECT_ERROR);
+                mSearchHandler.sendEmptyMessage(SearchActivity.CMD_SHOW_CONNECT_ERROR);
             }
         });
     }
@@ -652,8 +643,8 @@ public class SearchActivity extends BaseActivity {
     }
 
     private void showWaitDialog() {
-        String diagTitle = this.waitTitle;
-        String diagContent = this.waitContent;
+        String diagTitle = waitTitle;
+        String diagContent = waitContent;
         View waitDialog = LayoutInflater.from(this).inflate(R.layout.searchdevice_wait_dialog, null);
         TextView msgTV = (TextView) waitDialog.findViewById(R.id.wait_message);
         ((TextView) waitDialog.findViewById(R.id.wait_title)).setText(diagTitle);
@@ -673,14 +664,14 @@ public class SearchActivity extends BaseActivity {
 
     private void setActionBarUp() {
         Intent intent = getIntent();
-        Log.d(this.LOG_TAG, "setActionBarUp");
+        Log.d(LOG_TAG, "setActionBarUp");
         if (intent != null) {
-            this.mNeedBack = intent.getBooleanExtra(FLAG_NEED_BACK, false);
+            mNeedBack = intent.getBooleanExtra(FLAG_NEED_BACK, false);
             Log.d(this.LOG_TAG, "setActionBarUp_intent != null");
         }
         ActionBar actionBar = getSupportActionBar();
         Log.d(this.LOG_TAG, "setActionBarUp_getSupportActionBar");
-        if (this.mNeedBack) {
+        if (mNeedBack) {
             actionBar.setDisplayHomeAsUpEnabled(true);
         } else {
             actionBar.setDisplayHomeAsUpEnabled(false);

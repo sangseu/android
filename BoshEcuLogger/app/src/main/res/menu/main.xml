@@ -1,20 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu
-  xmlns:android="http://schemas.android.com/apk/res/android"
+<menu xmlns:tools="http://schemas.android.com/tools"
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
         android:id="@+id/action_progressbar"
-        android:title="@string/main_item_1"
+        android:title=""
         app:showAsAction="always"
-        app:actionLayout="@layout/actionbar_progressbar_view" />
+        app:actionLayout="@layout/actionbar_progressbar_view"
+        tools:ignore="AlwaysShowAction" />
     <item
         android:id="@+id/action_encn"
-        android:title="@string/main_item_2"
+        android:title=""
         app:showAsAction="always"
         app:actionLayout="@layout/actionbar_view" />
     <item
         android:icon="@drawable/icons_lights"
         android:id="@+id/action_settings"
-        android:title="@string/main_item_3"
+        android:title=""
         app:showAsAction="always" />
 </menu>

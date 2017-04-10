@@ -7,7 +7,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Handler;
 import android.preference.PreferenceManager;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.RelativeLayout;
@@ -38,20 +37,19 @@ public class LoadActivity extends Activity {
         this.mContext = this;
         getWindow().setFormat(RGBA_8888); /*1*/
         setContentView(R.layout.activity_load);
-        // Get language for GUI
+        /* Get language for GUI */
         getLanguageSettings();
-        // Get config from *.xml file, show activity_load's image
+        /* Get config from *.xml file, show activity_load's image */
         ConfigManager.getInstance(this).loadConfig("diag_cfg_strings.xml");
         RelativeLayout relativeLayout = (RelativeLayout) findViewById(R.id.load);
         /* chinese background */
-        if ("zh".equals(this.mCurrentLanguage)) {
+        if ("zh".equals(mCurrentLanguage)) {
             relativeLayout.setBackgroundResource(R.drawable.smarthome_light_chinese);
         } else { /* eng background */
             relativeLayout.setBackgroundResource(R.drawable.smarthome_light_english);
         }
 
         final Handler handler = new Handler();
-        Toast.makeText(this.mContext, "Loading component...", Toast.LENGTH_SHORT).show();
         /* get paired bluetooth device, run after LOAD_DISPLAY_TIME delay*/
         handler.postDelayed(new Runnable() {
             @Override
@@ -59,7 +57,7 @@ public class LoadActivity extends Activity {
                 preferences = LoadActivity.this.getSharedPreferences("bosch", MODE_PRIVATE); /*0*/
                 String bluetoothMAC = preferences.getString("bluetoothMAC", null);
                 if(adapter != null && adapter.isEnabled()) {
-                    pairedDevices = adapter.getDefaultAdapter().getBondedDevices();
+                    pairedDevices = adapter.getBondedDevices();
                 }
                 if (bluetoothMAC == null || pairedDevices.size() <= 0) {
                     Intent intent = new Intent(mContext, SearchActivity.class);
@@ -75,7 +73,8 @@ public class LoadActivity extends Activity {
                     }
                 }
                 if (!paired) {
-                    LoadActivity.this.mContext.startActivityForResult(new Intent(LoadActivity.this.mContext, SearchActivity.class), 0);
+                    Log.d(LOG_TAG, "call SearchActivity");
+                    mContext.startActivityForResult(new Intent(mContext, SearchActivity.class), 0);
                 }
             }
         }, LOAD_DISPLAY_TIME);
@@ -100,7 +99,7 @@ public class LoadActivity extends Activity {
     }
 
     private void getLanguageSettings() {
-        this.mCurrentLanguage = PreferenceManager.getDefaultSharedPreferences(this).getString("language", Locale.getDefault().getLanguage());
+        mCurrentLanguage = PreferenceManager.getDefaultSharedPreferences(this).getString("language", Locale.getDefault().getLanguage());
     }
 
     public void onBackPressed() {

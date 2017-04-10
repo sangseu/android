@@ -3,7 +3,6 @@ package mig0.bosheculogger.utils;
 import android.content.Context;
 import android.util.Log;
 import android.util.Xml;
-import android.widget.CursorAdapter;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -20,16 +19,16 @@ import java.util.HashMap;
 public class ConfigManager {
     private static ConfigManager sInstance;
     private String LOG_TAG = "ConfigManager";
-    private ArrayList<InformationInterface> mAdvancedInformations = new ArrayList();
-    private ArrayList<InformationInterface> mBasicInformations = new ArrayList();
+    private ArrayList<InformationInterface> mAdvancedInformations = new ArrayList<InformationInterface>();
+    private ArrayList<InformationInterface> mBasicInformations = new ArrayList<InformationInterface>();
     private Context mContext;
 
-    private ArrayList<FaultGroup> mFaultList = new ArrayList();
+    private ArrayList<FaultGroup> mFaultList = new ArrayList<FaultGroup>();
     private boolean mIsBigEndian = false;
     private Command mReadStatusCmd;
     private int mRequestInterVal = 250;
     private SoftwareInfo mSoftwareInfo = new SoftwareInfo();
-    private HashMap<String, StringBean> mStrings = new HashMap();
+    private HashMap<String, StringBean> mStrings = new HashMap<String, StringBean>();
 
     private ConfigManager(Context paramContext)
     {
@@ -85,7 +84,7 @@ public class ConfigManager {
     }
 
 
-    public boolean isBigEndian()
+    boolean isBigEndian()
     {
         return this.mIsBigEndian;
     }
@@ -114,6 +113,17 @@ public class ConfigManager {
                         break;
                     case XmlPullParser.START_TAG /*2*/: {
                         String tagName = parser.getName();
+
+                        /* diag_cfg_string */
+                        if ("string".equals(tagName)) {
+                            stringBean = new StringBean();
+                            stringBean.id = parser.getAttributeValue(null, "id");
+                            stringBean.en = parser.getAttributeValue(null, "en");
+                            stringBean.zh = parser.getAttributeValue(null, "zh");
+                            break;
+                        }
+
+                        /* diag_cfg_v255.6.1 */
                         if("software".equals(tagName)){
                             mSoftwareInfo = new SoftwareInfo();
                             break;
@@ -163,7 +173,6 @@ public class ConfigManager {
                         }
 
                         if ("Diagnostic".equals(tagName)) {
-                            mFaultList = new ArrayList();
                             Log.d(LOG_TAG, "PARSE Diagnostic");
                             break;
                         }
@@ -193,14 +202,12 @@ public class ConfigManager {
 
                         if ("BasicInformation".equals(tagName)) {
                             parsingBasicInformation = true;
-                            mBasicInformations = new ArrayList();
                             Log.d(LOG_TAG, "PARSE BasicInformation");
                             break;
                         }
 
                         if ("AdvancedInformation".equals(tagName)) {
                             parsingBasicInformation = false;
-                            mAdvancedInformations = new ArrayList();
                             Log.d(LOG_TAG, "PARSE AdvancedInformation");
                             break;
                         }
@@ -253,6 +260,13 @@ public class ConfigManager {
                     }
                     case XmlPullParser.END_TAG /*3*/: {
                         String tagName = parser.getName();
+
+                        if("string".equals(tagName)) {
+                            mStrings.put(stringBean.id, stringBean);
+                            Log.d(LOG_TAG, "END_TAG string");
+                            break;
+                        }
+
                         if ("software".equals(tagName)) {
                             Log.d(LOG_TAG, "END_TAG software");
                             break;
@@ -347,5 +361,8 @@ public class ConfigManager {
         public static final String WAIT = "wait";
         public static final String WAIT_CONTENT = "wait_content";
         public static final String WRONG_PACKAGE = "wrong_package";
+
+        public static final String HELP_TITLE = "help_title";
+        public static final String HELP_MESS = "help_mess";
     }
 }

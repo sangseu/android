@@ -16,7 +16,7 @@ public class Information extends BaseInformation implements InformationInterface
     public String unit;
 
     public Information() {
-        this.signed = "N";
+        signed = "N";
     }
 
     public String toString() {

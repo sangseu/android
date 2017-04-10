@@ -13,11 +13,11 @@ public class BluetoothTools {
     public static final int MESSAGE_READ_OBJECT = 4;
     public static final UUID PRIVATE_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
     /* cmdArray contain 61 bytes data received */
-    public static List<String> cmdArray = new ArrayList();
-    public static List<String> hardwareArray = new ArrayList();
-    public static List<BluetoothDevice> mDevices = new ArrayList();
-    public static List<String> serialArray = new ArrayList();
-    public static List<String> softwareArray = new ArrayList();
+    public static List<String> cmdArray = new ArrayList<String>();
+    public static List<String> hardwareArray = new ArrayList<String>();
+    public static List<BluetoothDevice> mDevices = new ArrayList<BluetoothDevice>();
+    public static List<String> serialArray = new ArrayList<String>();
+    public static List<String> softwareArray = new ArrayList<String>();
 
     public static String getSerialInfo() {
         if (serialArray == null || serialArray.size() == 0) {

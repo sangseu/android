@@ -14,7 +14,8 @@
     <string name="abc_shareactionprovider_share_with_application">Share with %s</string>
     <string name="abc_shareactionprovider_share_with">Share with</string>
     <string name="switch_chinese">中</string>
-    <string name="app_name">ECU tool</string>
+    <string name="switch_english">En</string>
+    <string name="app_name">ECU diagnose</string>
 
     <string name="main_item_1">main_item_1</string>
     <string name="main_item_2">main_item_2</string>

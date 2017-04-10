@@ -16,7 +16,7 @@
         <activity
             android:name=".activity.LoadActivity"
             android:screenOrientation="portrait"
-            android:theme="@android:style/Theme.Black">
+            android:theme="@android:style/Theme.NoTitleBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -24,17 +24,16 @@
             </intent-filter>
         </activity>
         <activity
+            android:logo="@drawable/logo1"
+            android:theme="@style/Theme.AppCompat.Light.BlueActionBar"
+            android:name=".activity.SearchActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:logo="@drawable/logo1"
             android:theme="@style/Theme.AppCompat.Light.BlueActionBar"
             android:name=".activity.MainActivity"
             android:screenOrientation="portrait"
-            android:configChanges="locale"
-            android:logo="@drawable/logo1" />
-        <activity
-            android:theme="@style/Theme.AppCompat.Light.BlueActionBar"
-            android:name=".activity.SearchActivity"
-            android:screenOrientation="portrait"
-            android:logo="@drawable/logo1" />
-
+            android:configChanges="locale" />
     </application>
 
 </manifest>

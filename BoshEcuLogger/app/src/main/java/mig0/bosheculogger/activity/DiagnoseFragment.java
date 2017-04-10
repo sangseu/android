@@ -47,13 +47,13 @@ public class DiagnoseFragment extends BaseFragment {
         }
 
         public ArrayList<FaultGroup> updateData() {
-            ArrayList<FaultGroup> filterList = new ArrayList();
+            ArrayList<FaultGroup> filterList = new ArrayList<FaultGroup>();
             Iterator it = ConfigManager.getInstance(this.mContext).getFaultList().iterator();
             while (it.hasNext()) {
                 FaultGroup group = (FaultGroup) it.next();
                 ArrayList<Fault> faults = group.childFaults;
                 int faultCount = 0;
-                ArrayList<Fault> needToAdd = new ArrayList();
+                ArrayList<Fault> needToAdd = new ArrayList<Fault>();
                 Iterator it2 = faults.iterator();
                 while (it2.hasNext()) {
                     Fault f = (Fault) it2.next();
