@@ -10,7 +10,7 @@
     </software>
     <!-- 0:小端模式 1:大端模式-->
     <endian value="0" />
-    <interval value="150"></interval>
+    <interval value="500"></interval>
     
     <!-- 可配置的读状态信息指令 -->
     <!-- 命令:0xC0, 长度:0x3D, ID:0x06 -->

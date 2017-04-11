@@ -4,7 +4,6 @@
 
     <uses-permission android:name="android.permission.BLUETOOTH" />
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
     <application
         android:allowBackup="true"
@@ -16,7 +15,7 @@
         <activity
             android:name=".activity.LoadActivity"
             android:screenOrientation="portrait"
-            android:theme="@android:style/Theme.NoTitleBar">
+            android:theme="@style/Theme.AppCompat.Light">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -34,6 +33,14 @@
             android:name=".activity.MainActivity"
             android:screenOrientation="portrait"
             android:configChanges="locale" />
+        <activity
+            android:theme="@style/Theme.AppCompat.Light.BlueActionBar"
+            android:name=".activity.HelpActivity"
+            android:screenOrientation="portrait"
+            android:logo="@drawable/logo1" />
+        <service
+            android:name=".service.BluetoothConnectionService"
+            android:exported="false" />
     </application>
 
 </manifest>

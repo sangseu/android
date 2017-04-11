@@ -19,16 +19,17 @@ import java.util.HashMap;
 public class ConfigManager {
     private static ConfigManager sInstance;
     private String LOG_TAG = "ConfigManager";
-    private ArrayList<InformationInterface> mAdvancedInformations = new ArrayList<InformationInterface>();
-    private ArrayList<InformationInterface> mBasicInformations = new ArrayList<InformationInterface>();
+
     private Context mContext;
 
-    private ArrayList<FaultGroup> mFaultList = new ArrayList<FaultGroup>();
-    private boolean mIsBigEndian = false;
+    private ArrayList<InformationInterface> mAdvancedInformations;
+    private ArrayList<InformationInterface> mBasicInformations;
+    private ArrayList<FaultGroup> mFaultList;
+    private boolean mIsBigEndian;
     private Command mReadStatusCmd;
-    private int mRequestInterVal = 250;
-    private SoftwareInfo mSoftwareInfo = new SoftwareInfo();
-    private HashMap<String, StringBean> mStrings = new HashMap<String, StringBean>();
+    private int mRequestInterVal;
+    private SoftwareInfo mSoftwareInfo;
+    private HashMap<String, StringBean> mStrings = new HashMap<String, StringBean>();;
 
     private ConfigManager(Context paramContext)
     {
@@ -95,15 +96,25 @@ public class ConfigManager {
         Log.i(this.LOG_TAG, "try to load " + configName);
         long start = System.currentTimeMillis();
         try {
-            InputStream is = this.mContext.getAssets().open(configName);
+            InputStream is = mContext.getAssets().open(configName);
             if (is == null) {
                 return false;
             }
             XmlPullParser parser = Xml.newPullParser();
             parser.setInput(is, "utf-8");
+
+
             StringBean stringBean = null;
             FaultGroup fGroup = null;
-            boolean parsingBasicInformation = false;
+            boolean parsingBasicInformation = true;
+
+            mAdvancedInformations = new ArrayList<InformationInterface>();
+            mBasicInformations = new ArrayList<InformationInterface>();
+            mFaultList = new ArrayList<FaultGroup>();
+            mIsBigEndian = false;
+            mRequestInterVal = 250;
+            mSoftwareInfo = new SoftwareInfo();
+
             for (int event = parser.getEventType();
                  event != XmlPullParser.END_DOCUMENT;/*1*/
                  event = parser.next())
@@ -125,19 +136,22 @@ public class ConfigManager {
 
                         /* diag_cfg_v255.6.1 */
                         if("software".equals(tagName)){
-                            mSoftwareInfo = new SoftwareInfo();
+                            Log.d(LOG_TAG, "PARSE software");
                             break;
                         }
                             if("softwareVersion".equals(tagName)){
                                 mSoftwareInfo.softwareVersion = parser.nextText();
+                                Log.d(LOG_TAG, "PARSE softwareVersion");
                                 break;
                             }
                             if("configVersion".equals(tagName)){
                                 mSoftwareInfo.configVersion = parser.nextText();
+                                Log.d(LOG_TAG, "PARSE configVersion");
                                 break;
                             }
                             if("appVersion".equals(tagName)){
                                 mSoftwareInfo.appVersion = parser.nextText();
+                                Log.d(LOG_TAG, "PARSE appVersion");
                                 break;
                             }
 
@@ -235,7 +249,7 @@ public class ConfigManager {
                                     break;
                                 }
                             }
-                            if ("BitInformation".equals(tagName)) {
+                            if ("BitInfomation".equals(tagName)) {
                                 BitInfomation info = new BitInfomation();
                                 info.nameEn = parser.getAttributeValue(null, "en");
                                 info.nameZh = parser.getAttributeValue(null, "zh");
@@ -245,7 +259,6 @@ public class ConfigManager {
                                 info.zh1 = parser.getAttributeValue(null, "zh1");
                                 info.en0 = parser.getAttributeValue(null, "en0");
                                 info.en1 = parser.getAttributeValue(null, "en1");
-                                mBasicInformations.add(info);
                                 if(parsingBasicInformation) {
                                     mBasicInformations.add(info);
                                     Log.d(LOG_TAG, "PARSE BasicInformation_BitInformation");
@@ -279,6 +292,11 @@ public class ConfigManager {
                             break;
                         }
 
+                        if ("Diagnostic".equals(tagName)) {
+                            Log.d(LOG_TAG, "END_TAG Diagnostic");
+                            break;
+                        }
+
                         if ("BasicInformation".equals(tagName)) {
                             parsingBasicInformation = false;
                             Log.d(LOG_TAG, "END_TAG BasicInformation");
@@ -286,6 +304,7 @@ public class ConfigManager {
                         }
 
                         if ("AdvancedInformation".equals(tagName)) {
+                            parsingBasicInformation = true;
                             Log.d(LOG_TAG, "END_TAG AdvancedInformation");
                             break;
                         }

@@ -69,7 +69,7 @@ public class SearchActivity extends BaseActivity {
     private String exitOk;
     private String exitTitle;
     private String foundDevice;
-    ArrayList<DeviceGroup> groups = new ArrayList();
+    ArrayList<DeviceGroup> groups = new ArrayList<DeviceGroup>();
     private MyAdapter mAdapter;
     private AnimationDrawable mAnimationDrawable;
     private BluetoothDiagBroadcast mBluetoothReceiver;
@@ -105,16 +105,16 @@ public class SearchActivity extends BaseActivity {
         public void onReceive(Context ctx, Intent intent) {
             if (intent != null) {
                 String actionString = intent.getAction();
-                Log.d(SearchActivity.this.LOG_TAG, "current connected action: " + actionString);
+                Log.d(LOG_TAG, "current connected action: " + actionString);
                 Message message;
                 if (BluetoothDevice.ACTION_FOUND.equals(actionString)) {
                     BluetoothDevice bluetoothDevice = (BluetoothDevice) intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
                     if (bluetoothDevice.getBondState() != 12) {
-                        Log.i(SearchActivity.this.LOG_TAG, "Bluetooth Signal Strength:    " + bluetoothDevice.getName() + ":  " + intent.getExtras().getShort(BluetoothDevice.EXTRA_RSSI) + "dBM");
+                        Log.i(LOG_TAG, "Bluetooth Signal Strength:    " + bluetoothDevice.getName() + ":  " + intent.getExtras().getShort(BluetoothDevice.EXTRA_RSSI) + "dBM");
                     }
                     if (!(bluetoothDevice == null || TextUtils.isEmpty(bluetoothDevice.getName()) || BluetoothTools.mDevices.contains(bluetoothDevice))) {
                         BluetoothTools.mDevices.add(bluetoothDevice);
-                        Log.i(SearchActivity.this.LOG_TAG, "device size" + BluetoothTools.mDevices.size());
+                        Log.i(LOG_TAG, "device size" + BluetoothTools.mDevices.size());
                     }
                     if (BluetoothTools.mDevices.size() > 0) {
                         message = new Message();
@@ -127,11 +127,11 @@ public class SearchActivity extends BaseActivity {
                     if (BluetoothTools.mDevices.isEmpty()) {
                         message = new Message();
                         message.what = SearchActivity.CMD_NO_DEVICE_FOUND;
-                        SearchActivity.this.mSearchHandler.sendMessage(message);
+                        mSearchHandler.sendMessage(message);
                     } else if (BluetoothTools.mDevices.size() > 0) {
                         message = new Message();
                         message.what = SearchActivity.CMD_ALL_DEVICE_FOUND;
-                        SearchActivity.this.mSearchHandler.sendMessage(message);
+                        mSearchHandler.sendMessage(message);
                     }
                 } else if (!BluetoothDevice.ACTION_BOND_STATE_CHANGED.equals(actionString) && !BluetoothAdapter.ACTION_STATE_CHANGED.equals(actionString)) {
                     if (BluetoothConnectionService.INTENT_CONNECTING.equals(actionString)) {
@@ -217,13 +217,13 @@ public class SearchActivity extends BaseActivity {
                     }
                     TextView msgView = (TextView) layout.findViewById(R.id.unpair_diag_message);
                     if (msgView != null) {
-                        msgView.setText(SearchActivity.this.unpairMessage);
+                        msgView.setText(unpairMessage);
                     }
                     Button cancelBtn = (Button) layout.findViewById(R.id.cancel_btn);
                     Button okBtn = (Button) layout.findViewById(R.id.ok_btn);
                     if (!(cancelBtn == null || okBtn == null)) {
                         cancelBtn.setText(SearchActivity.this.unpairCancel);
-                        okBtn.setText(SearchActivity.this.unpairOk);
+                        okBtn.setText(unpairOk);
                     }
                     final int i = groupPosition;
                     final int i2 = childPosition;
@@ -344,10 +344,10 @@ public class SearchActivity extends BaseActivity {
         private void unPairedDev(BluetoothDevice bluetoothDevice) {
             if (bluetoothDevice != null) {
                 try {
-                    Boolean returnValue = (Boolean) bluetoothDevice.getClass().getMethod("removeBond", new Class[0]).invoke(bluetoothDevice, new Object[0]);
+                    Boolean returnValue = (Boolean) bluetoothDevice.getClass().getMethod("removeBond", (Class[]) null).invoke(bluetoothDevice,(Object[]) null);
                     Log.i(LOG_TAG, "removeBond return value: " + returnValue);
-                    if (!returnValue.booleanValue() || this.mUnpairDialog == null) {
-                        this.mUnpairDialog.dismiss();
+                    if ((returnValue) && mUnpairDialog != null) {
+                        mUnpairDialog.dismiss();
                         View layout = ((LayoutInflater) SearchActivity.this.mContext.getSystemService(LAYOUT_INFLATER_SERVICE)).inflate(R.layout.unpaired_failed_dialog, null);
                         TextView titleView = (TextView) layout.findViewById(R.id.unpair_failed_title);
                         if (titleView != null) {
@@ -443,11 +443,13 @@ public class SearchActivity extends BaseActivity {
         mContext = this;
         initStringRes();
         Log.d(this.LOG_TAG, "onCreat_" + title);
-        setTitle(title);
-        getSupportActionBar().setTitle(title);
         Log.d(this.LOG_TAG, "onCreat_setTitle");
-        if (VERSION.SDK_INT <= 13) {
-            getSupportActionBar().setIcon((int) R.drawable.logo1);
+        if (getSupportActionBar() != null)
+        {
+            getSupportActionBar().setDisplayShowHomeEnabled(true);
+            getSupportActionBar().setTitle(title);
+            getSupportActionBar().setIcon(R.drawable.logo_trans);
+            getSupportActionBar().setDisplayUseLogoEnabled(true);
         }
         this.mSearchHandler = new SearchHandler(this);
         if (BluetoothTools.mDevices != null) {
@@ -672,9 +674,13 @@ public class SearchActivity extends BaseActivity {
         ActionBar actionBar = getSupportActionBar();
         Log.d(this.LOG_TAG, "setActionBarUp_getSupportActionBar");
         if (mNeedBack) {
-            actionBar.setDisplayHomeAsUpEnabled(true);
+            if(actionBar != null) {
+                actionBar.setDisplayHomeAsUpEnabled(true);
+            }
         } else {
-            actionBar.setDisplayHomeAsUpEnabled(false);
+            if(actionBar != null) {
+                actionBar.setDisplayHomeAsUpEnabled(false);
+            }
         }
     }
 

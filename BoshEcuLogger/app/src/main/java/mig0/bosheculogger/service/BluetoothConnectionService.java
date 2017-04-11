@@ -8,6 +8,9 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.util.Log;
+
+import mig0.bosheculogger.activity.BaseActivity;
+import mig0.bosheculogger.activity.MainActivity;
 import mig0.bosheculogger.service.DeviceConnectionManager.ConnectStatusListener;
 import java.lang.ref.WeakReference;
 import java.util.Set;
@@ -35,7 +38,7 @@ public class BluetoothConnectionService extends Service {
         @Override
         public void handleMessage(Message msg) {
             if (msg.what == BluetoothConnectionService.CMD_CONNECT) {
-                BluetoothConnectionService service = (BluetoothConnectionService) this.mService.get();
+                BluetoothConnectionService service = mService.get();
                 Log.d(BluetoothConnectionService.TAG, "service canceled " + service.mCanceled);
                 if (service == null || service.mCanceled) {
                     Log.e(BluetoothConnectionService.TAG, "service instanse null or canceled");
@@ -62,11 +65,11 @@ public class BluetoothConnectionService extends Service {
             }
         }
         if (deviceToConnect != null) {
-            connectDecvie(deviceToConnect);
+            connectDevice(deviceToConnect);
         }
     }
 
-    private void connectDecvie(BluetoothDevice device) {
+    private void connectDevice(BluetoothDevice device) {
         Log.d(TAG, "try to connect device " + device);
         broadcastConnecting(device);
         DeviceConnectionManager.getInstance(this).connectDevice(device, new ConnectStatusListener() {
@@ -81,7 +84,9 @@ public class BluetoothConnectionService extends Service {
                 Log.d(BluetoothConnectionService.TAG, "onConnectError!");
                 if (!BluetoothConnectionService.this.mCanceled) {
                     BluetoothConnectionService.this.boradcastConnectError();
-                    BluetoothConnectionService.this.mHandler.sendEmptyMessageDelayed(1, 1000);
+                    if(BaseActivity.isAnimation == 0) {
+                        BluetoothConnectionService.this.mHandler.sendEmptyMessageDelayed(CMD_CONNECT, 10000);
+                    }
                 }
             }
         });
@@ -127,12 +132,12 @@ public class BluetoothConnectionService extends Service {
         String action = intent.getAction();
         Log.d(TAG, "service got action : " + action);
         if (ACTION_CONNECT.equals(action)) {
-            this.mHandler.sendEmptyMessage(CMD_CONNECT);
-            this.mCanceled = false;
+            mHandler.sendEmptyMessage(CMD_CONNECT);
+            mCanceled = false;
         } else if (ACTION_CANCEL.equals(action)) {
-            this.mHandler.removeMessages(CMD_CONNECT);
+            mHandler.removeMessages(CMD_CONNECT);
             stopSelf();
-            this.mCanceled = true;
+            mCanceled = true;
         }
         return super.onStartCommand(intent, flags, startId);
     }

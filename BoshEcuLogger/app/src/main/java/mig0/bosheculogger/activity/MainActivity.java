@@ -23,7 +23,9 @@ import android.support.v4.widget.CursorAdapter;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AlertDialog.Builder;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -66,6 +68,8 @@ public class MainActivity extends AppCompatActivity {
 
     private static int max_handshake_retry = 3;
     private static int max_request_retry = 4;
+
+    private boolean animation = false;
 
     private static final int CMD_HANDSHAKE_TIMEOUT = 1004;
     private static final int CMD_REQUEST_CONTROL_MESSAGE = 1002;
@@ -117,8 +121,10 @@ public class MainActivity extends AppCompatActivity {
         getLanguageSettings();
         updateTitle(mCurrentLanguage);
 
-        if (Build.VERSION.SDK_INT <= 13) {
-            getSupportActionBar().setIcon(R.drawable.logo1);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayShowHomeEnabled(true);
+            getSupportActionBar().setIcon(R.drawable.logo_trans);
+            getSupportActionBar().setDisplayUseLogoEnabled(true);
         }
         mMainHandler = new MainHandler(this);
         /*start thread that has a lopper*/
@@ -186,7 +192,7 @@ public class MainActivity extends AppCompatActivity {
         super.onConfigurationChanged(newConfig);
     }
 
-    /* don't need @Override */
+    @Override
     public void onBackPressed() {
         Builder builder = new Builder(this);
         ConfigManager cManager = ConfigManager.getInstance(this);
@@ -217,20 +223,19 @@ public class MainActivity extends AppCompatActivity {
             case R.id.action_settings:
                 Log.e(LOG_TAG, "onOptionsItemSelected: " + item.getTitle());
                 startActivity(new Intent(this, HelpActivity.class));
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
+                break;
         }
+        return super.onOptionsItemSelected(item);
     }
 
     @Override
     protected void onDestroy() {
         Log.e(LOG_TAG, "main onDestory");
-        this.mDeviceConnectionManager.clear();
+        mDeviceConnectionManager.clear();
         BluetoothTools.cmdArray.clear();
         cleanMessage();
-        this.mWorkHandler.removeMessages(CMD_WRITE);
-        this.mWorkThread.quit();
+        mWorkHandler.removeMessages(CMD_WRITE);
+        mWorkThread.quit();
         super.onDestroy();
     }
 
@@ -350,6 +355,7 @@ public class MainActivity extends AppCompatActivity {
             Log.i(LOG_TAG, "stopAnimation");
             mRunningAnimation.stop();
             mRunningAnimation.selectDrawable(0);/*stop animation, go to child 0*/
+            BaseActivity.isAnimation = 0;
         }
     }
 
@@ -362,6 +368,7 @@ public class MainActivity extends AppCompatActivity {
         if (mRunningAnimation != null && !mRunningAnimation.isRunning()) {
             mRunningAnimation.start();
         }
+        BaseActivity.isAnimation = 0;
     }
 
     private void handleMessageRead(String messageRead) {
@@ -521,11 +528,13 @@ public class MainActivity extends AppCompatActivity {
         builder.setTitle(title);
         builder.setMessage(message);
         builder.setPositiveButton(ok, new OnClickListener() {
+            @Override
             public void onClick(DialogInterface dialog, int whichButton) {
                 MainActivity.this.finish();
             }
         });
         builder.setOnKeyListener(new OnKeyListener() {
+            @Override
             public boolean onKey(DialogInterface dialog, int keyCode, KeyEvent event) {
                 if (keyCode == 4) {
                     return true;
@@ -708,11 +717,16 @@ public class MainActivity extends AppCompatActivity {
             String action = intent.getAction();
             if (BluetoothConnectionService.INTENT_CONNECTING.equals(action)) {
                 ConfigManager cManager = ConfigManager.getInstance(MainActivity.this);
-                Toast.makeText(MainActivity.this, cManager.getString(mCurrentLanguage, Strings.CONNECT_TO) + intent.getStringExtra("deviceName"), Toast.LENGTH_SHORT).show();
+                String connect_to_device = intent.getStringExtra("deviceName");
+                if((connect_to_device != null) && !animation) {
+                    Toast.makeText(MainActivity.this, cManager.getString(mCurrentLanguage, Strings.CONNECT_TO) + connect_to_device, Toast.LENGTH_SHORT).show();
+                }
             } else if (BluetoothConnectionService.INTENT_CONNECT_SUCCESS.equals(action)) {
                 MainActivity.this.start();
             } else if (BluetoothConnectionService.INTENT_CONNECT_ERROR.equals(action)) {
-                Toast.makeText(MainActivity.this, ConfigManager.getInstance(MainActivity.this).getString(mCurrentLanguage, Strings.CONNECT_FAIL), Toast.LENGTH_SHORT).show();
+                if (!animation) {
+                    Toast.makeText(MainActivity.this, ConfigManager.getInstance(MainActivity.this).getString(mCurrentLanguage, Strings.CONNECT_FAIL), Toast.LENGTH_SHORT).show();
+                }
             }
         }
     }
@@ -774,6 +788,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.main, menu);
+        /* language button */
         final Button button = (Button) ((LinearLayout) MenuItemCompat.getActionView(menu.findItem(R.id.action_encn))).findViewById(R.id.button_view);
         if ("zh".equals(this.mCurrentLanguage)) {
             button.setText(getResources().getString(R.string.switch_english));
@@ -793,6 +808,7 @@ public class MainActivity extends AppCompatActivity {
                 switchLanguage("zh");
             }
         });
+        /* Animation running */
         mRunningAnimation = (AnimationDrawable) ((ImageView) ((LinearLayout) MenuItemCompat.getActionView(menu.findItem(R.id.action_progressbar))).findViewById(R.id.imageView_red)).getBackground();
         return true;
     }

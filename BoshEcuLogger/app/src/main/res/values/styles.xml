@@ -32,12 +32,13 @@
   <item name="titleTextStyle">@style/WeChatActionBarTitleText</item>
   <item name="background">@drawable/actionbar_item_normal</item>
  </style>
+
  <style
      name="Theme.AppCompat.Light.BlueActionBar"
      parent="@style/Theme.AppCompat.Light">
-  <item
-      name="actionBarStyle">@style/ActionbarBackground
-  </item>
+  <item name="actionBarStyle">@style/ActionbarBackground</item>
+  <item name="homeAsUpIndicator">@drawable/abc_ic_ab_back_holo_light</item>
+
  </style>
  <style name="WeChatActionBarTitleText">
   <item name="android:textSize">17.0sp</item>

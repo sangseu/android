@@ -28,7 +28,7 @@ public class LoadActivity extends Activity {
     private Activity mContext;
     protected String mCurrentLanguage;
     public SharedPreferences preferences;
-    private BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
+    private BluetoothAdapter adapter ;
     private Set<BluetoothDevice> pairedDevices;
 
     @Override
@@ -56,20 +56,30 @@ public class LoadActivity extends Activity {
             public void run() {
                 preferences = LoadActivity.this.getSharedPreferences("bosch", MODE_PRIVATE); /*0*/
                 String bluetoothMAC = preferences.getString("bluetoothMAC", null);
-                if(adapter != null && adapter.isEnabled()) {
-                    pairedDevices = adapter.getBondedDevices();
-                }
-                if (bluetoothMAC == null || pairedDevices.size() <= 0) {
-                    Intent intent = new Intent(mContext, SearchActivity.class);
-                    startActivityForResult(intent, 0);
-                    return;
-                }
+                Log.d(LOG_TAG, "bluetooth MAC: " + bluetoothMAC);
+                adapter = BluetoothAdapter.getDefaultAdapter();
+                Log.d(LOG_TAG, "pass getDefaultAdapter");
+
                 boolean paired = false;
-                for (BluetoothDevice bluetoothDevice : pairedDevices) {
-                    if (bluetoothDevice.getAddress().equals(bluetoothMAC)) {
-                        connectDevice(bluetoothDevice);
-                        paired = true;
-                        break;
+                if(adapter != null && adapter.isEnabled()) {
+                    Log.d(LOG_TAG, "start call getBondedDevices");
+                    pairedDevices = adapter.getBondedDevices();
+                    Log.d(LOG_TAG, "pass call getBondedDevices");
+
+                    if (bluetoothMAC == null || pairedDevices.size() <= 0) {
+                        Log.d(LOG_TAG, "call SearchActivity_startActivityForResult");
+                        Intent intent = new Intent(mContext, SearchActivity.class);
+                        startActivityForResult(intent, 0);
+                        return;
+                    }
+
+
+                    for (BluetoothDevice bluetoothDevice : pairedDevices) {
+                        if (bluetoothDevice.getAddress().equals(bluetoothMAC)) {
+                            connectDevice(bluetoothDevice);
+                            paired = true;
+                            break;
+                        }
                     }
                 }
                 if (!paired) {
@@ -113,7 +123,7 @@ public class LoadActivity extends Activity {
             gotoMain();
         } else if (resultCode == RESULT_CANCELED) { /*0*/
             Log.d(LOG_TAG, "load got result canceled!");
-            finish();
+            LoadActivity.this.finish();
         }
         super.onActivityResult(requestCode, resultCode, data);
     }
@@ -122,6 +132,6 @@ public class LoadActivity extends Activity {
     private void gotoMain() {
         this.mContext.startActivity(new Intent(this.mContext, MainActivity.class));
         Log.d(LOG_TAG, "gotoMain");
-        finish();
+        LoadActivity.this.finish();
     }
 }

@@ -23,6 +23,8 @@ public class BluetoothCommunThread extends Thread {
     int totalBytes;
     String totalData;
 
+    private boolean bluetooth_has_exception = false;
+
     public interface DataCallbackListener {
         void onConnectionError();
 
@@ -75,7 +77,7 @@ public class BluetoothCommunThread extends Thread {
             int partByteSize = -1;
             try {
                 if (this.mInputStream != null) {
-                    partByteSize = this.mInputStream.read(this.buffer);
+                    partByteSize = mInputStream.read(this.buffer);
                 }
                 if (partByteSize > 0) {
                     byte[] buf_dataTemp = new byte[partByteSize];
@@ -138,6 +140,7 @@ public class BluetoothCommunThread extends Thread {
                     return;
                 }
             } catch (Exception ex) {
+                bluetooth_has_exception = true;
                 Log.e(LOG_TAG, "Read bluetooth has exception");
                 if (this.mCallbackListener != null) {
                     this.mCallbackListener.onConnectionLost();
@@ -197,19 +200,20 @@ public class BluetoothCommunThread extends Thread {
         }
     }
 
+    /*
     @SuppressLint({"NewApi"})
     private boolean isSocketConnect() {
         int sdkLevel = VERSION.SDK_INT;
         if (sdkLevel > 13) {
-            return this.mSocket.isConnected();
+            return mSocket.isConnected();
         }
         if (sdkLevel <= 6) {
             return false;
         }
         try {
-            Field closedField = this.mSocket.getClass().getDeclaredField("mClosed");
+            Field closedField = mSocket.getClass().getDeclaredField("mClosed");
             closedField.setAccessible(true);
-            return !closedField.getBoolean(this.mSocket);
+            return !closedField.getBoolean(mSocket);
         } catch (NoSuchFieldException e) {
             e.printStackTrace();
             return false;
@@ -220,6 +224,12 @@ public class BluetoothCommunThread extends Thread {
             e3.printStackTrace();
             return false;
         }
+    }
+    */
+    @SuppressLint("NewApi")
+    private boolean isSocketConnect() {
+        if(bluetooth_has_exception) return false;
+        else return mSocket.isConnected();
     }
 
     public void reset() {

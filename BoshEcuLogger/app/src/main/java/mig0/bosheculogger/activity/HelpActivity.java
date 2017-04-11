@@ -28,10 +28,6 @@ import mig0.bosheculogger.utils.ConfigManager;
 import mig0.bosheculogger.utils.ConfigManager.Strings;
 import mig0.bosheculogger.utils.StringUtil;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
 
 public class HelpActivity extends BaseActivity {
     private Context mContext;
@@ -107,16 +103,21 @@ public class HelpActivity extends BaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        Log.d(this.LOG_TAG, "onCreate");
         setContentView((int) R.layout.help_activity);
         mContext = this;
         ActionBar actionBar = getSupportActionBar();
         actionBar.setDisplayHomeAsUpEnabled(true);
+
         CharSequence title = ConfigManager.getInstance(this).getString(mCurrentLanguage, Strings.HELP);
         setTitle(title);
         actionBar.setTitle(title);
-        if (VERSION.SDK_INT <= 13) {
-            getSupportActionBar().setIcon((int) R.drawable.logo1);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayShowHomeEnabled(true);
+            getSupportActionBar().setIcon(R.drawable.logo_trans);
+            getSupportActionBar().setDisplayUseLogoEnabled(true);
         }
+
         ListView mlistView;
         mlistView = (ListView) findViewById(R.id.listView1);
         mlistView.setAdapter(new MyAdapter(StringUtil.getHelpItems(mCurrentLanguage)));

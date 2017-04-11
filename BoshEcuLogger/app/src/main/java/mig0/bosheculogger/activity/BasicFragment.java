@@ -49,12 +49,12 @@ public class BasicFragment extends BaseFragment {
 
         public View getView(int position, View convertView, ViewGroup parent) {
             if (convertView == null) {
-                convertView = this.mInflater.inflate(R.layout.basic_item, parent, false);
+                convertView = mInflater.inflate(R.layout.basic_item, parent, false);
             }
             TextView itemText = (TextView) convertView.findViewById(R.id.item_text);
             TextView itemValue = (TextView) convertView.findViewById(R.id.item_value);
-            InformationInterface info = (InformationInterface) this.mBasicListData.get(position);
-            info.setLanguage(BasicFragment.this.mCurrentLanguage);
+            InformationInterface info = (InformationInterface) mBasicListData.get(position);
+            info.setLanguage(mCurrentLanguage);
             String name = info.getName();
             itemText.setText(name);
             String value = info.getValue();

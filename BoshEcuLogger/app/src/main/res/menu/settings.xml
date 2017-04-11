@@ -4,7 +4,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
         android:id="@+id/action_progressbar_refresh"
-        android:title="@string/setting_item_1"
+        android:title=""
         app:showAsAction="always"
         app:actionLayout="@layout/actionbar_progressbar_settings_view" />
 </menu>

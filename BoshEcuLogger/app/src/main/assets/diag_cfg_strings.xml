@@ -23,7 +23,7 @@
     <string id="exit_posbtn" en="Exit" zh="退出"/>
     <string id="exit_navbtn" en="Cancel" zh="取消"/>
     <string id="stop_search" en="Stop" zh="停止"/>
-    <string id="title_main" en="eScooter" zh="诊断工具"/>
+    <string id="title_main" en="ECU diagnostic" zh="诊断工具"/>
     <string id="bt_paired_device" en="PAIRED DEVICES" zh="已配对的设备"/>
     <string id="bt_found_device" en="AVAILABLE DEVICES" zh="可用设备"/>
     <string id="wait" en="wait" zh="等待"/>
