@@ -18,141 +18,17 @@ import static android.content.Context.MODE_PRIVATE;
 
 public class DeviceConnectionManager {
     private static DeviceConnectionManager sInstance;
-    private String LOG_TAG = getClass().getSimpleName();
+    private String LOG_TAG = "devicecnnManager";
+
     private BluetoothCommunThread mBluetoothCommunThread;
+    private createSocket mcreateSocket;
+
     private ConnectStatusListener mConnectStatusListener;
     private BluetoothSocket mConnectionSocket;
     private Context mContext;
     private BluetoothDevice mCurrentDevice;
 
-    //private boolean bluetooth_has_exception = false;
-
-    /*
-    private class createSocket extends Thread {
-        private final BluetoothDevice bluetoothDevice;
-        private final BluetoothSocket bluetoothSocket;
-
-        private createSocket(BluetoothDevice device) {
-            if(device == null) {
-                return;
-            }
-            this.bluetoothDevice = device;
-            BluetoothSocket tmp = null;
-            try{
-                Method m = device.getClass().getMethod("createRfcommSocket", new Class[]{int.class});
-                tmp = (BluetoothSocket)m.invoke(device, 1);
-            }catch (SecurityException e) {
-                Log.e(LOG_TAG, "create() failed", e);
-            } catch (NoSuchMethodException e) {
-                Log.e(LOG_TAG, "create() failed", e);
-            } catch (IllegalArgumentException e) {
-                Log.e(LOG_TAG, "create() failed", e);
-            } catch (IllegalAccessException e) {
-                Log.e(LOG_TAG, "create() failed", e);
-            } catch (InvocationTargetException e) {
-                Log.e(LOG_TAG, "create() failed", e);
-            }
-            bluetoothSocket = tmp;
-        }
-
-        @Override
-        public void run() {
-            try
-            {
-                bluetoothSocket.connect();
-                try
-                {
-                    if ((mConnectionSocket != null) && isSocketConnect())
-                    {
-                        Log.i(LOG_TAG, "close preview device " + DeviceConnectionManager.this.mCurrentDevice);
-                        mBluetoothCommunThread.streamFlush();
-                        mConnectionSocket.close();
-                    }
-                    mConnectionSocket = bluetoothSocket;
-                    mCurrentDevice = bluetoothDevice;
-                    saveBluetooth(false);
-                    if (mConnectStatusListener != null)
-                    {
-                        Log.d(LOG_TAG, "create socket successful");
-                        mConnectStatusListener.onConnectSuccess();
-                        return;
-                    }
-                }
-                catch (IOException e)
-                {
-                    Log.i(LOG_TAG, "Connect unsuccess.", e);
-                }
-                return;
-            }
-            catch (IOException e)
-            {
-                bluetooth_has_exception = true;
-                e.printStackTrace();
-                if (mConnectStatusListener != null)
-                {
-                    mConnectStatusListener.onConnectError();
-                    Log.d(LOG_TAG, "Unable to connect.", e);
-                    return;
-                }
-            }
-        }
-    }
-    */
-
-    /*
-    private void createSocket(final BluetoothDevice device) {
-        if(device != null){
-            new Thread(){
-                @Override
-                public void run() {
-                    BluetoothSocket localBluetoothSocket;
-                    try {
-                        Log.d(LOG_TAG, "try to create new device socket");
-                        Method m = device.getClass().getMethod("createRfcommSocket", new Class[]{int.class});
-                        localBluetoothSocket = (BluetoothSocket)m.invoke(device, 1);
-                        localBluetoothSocket.connect();
-
-                        try {
-                            if((mConnectionSocket != null) && isSocketConnect()) {
-                                Log.i(LOG_TAG, "close preview device " + mCurrentDevice);
-                                mBluetoothCommunThread.streamFlush();
-                                mConnectionSocket.close();
-                            }
-                            mConnectionSocket = localBluetoothSocket;
-                            mCurrentDevice = device;
-                            saveBluetooth(false);
-                            if (mConnectStatusListener != null)
-                            {
-                                Log.d(LOG_TAG, "create socket successful");
-                                mConnectStatusListener.onConnectSuccess();
-                            }
-                        }
-                        catch (IOException e) {
-                            Log.e(LOG_TAG, "create() failed", e);
-                        }
-                    }
-                    catch (IOException e){
-                        Log.e(LOG_TAG, "create() failed", e);
-                        if (mConnectStatusListener != null)
-                        {
-                            mConnectStatusListener.onConnectError();
-                        }
-                    } catch (SecurityException e) {
-                        Log.e(LOG_TAG, "create() failed", e);
-                    } catch (NoSuchMethodException e) {
-                        Log.e(LOG_TAG, "create() failed", e);
-                    } catch (IllegalArgumentException e) {
-                        Log.e(LOG_TAG, "create() failed", e);
-                    } catch (IllegalAccessException e) {
-                        Log.e(LOG_TAG, "create() failed", e);
-                    } catch (InvocationTargetException e) {
-                        Log.e(LOG_TAG, "create() failed", e);
-                    }
-                }
-            }.start();
-        }
-    }
-    */
+    private boolean runThread = true;
 
     public interface ConnectStatusListener {
         void onConnectError();
@@ -177,7 +53,9 @@ public class DeviceConnectionManager {
 
     private void createSocket(BluetoothDevice device) {
         if (device != null) {
-            new createSocket(device).start();
+            //new createSocket(device).start();
+            mcreateSocket = new createSocket(device);
+            mcreateSocket.start();
         }
     }
 
@@ -195,12 +73,12 @@ public class DeviceConnectionManager {
                     dataCallbackListener.onSocketNullException();
                 }
             } else if (isSocketConnect()) {
-                this.mBluetoothCommunThread = new BluetoothCommunThread(dataCallbackListener, this.mConnectionSocket);
-                this.mBluetoothCommunThread.start();
+                mBluetoothCommunThread = new BluetoothCommunThread(dataCallbackListener, this.mConnectionSocket);
+                mBluetoothCommunThread.start();
+                Log.e(this.LOG_TAG, "start thread !");
             } else if (dataCallbackListener != null) {
                 dataCallbackListener.onSocketClosedException();
             }
-            Log.e(this.LOG_TAG, "start thread !");
         }
     }
 
@@ -238,27 +116,32 @@ public class DeviceConnectionManager {
             editor.putString("bluetoothMAC", "");
             return;
         }
-        editor.putString("bluetoothNAME", this.mCurrentDevice.getName());
-        editor.putString("bluetoothMAC", this.mCurrentDevice.getAddress());
+        editor.putString("bluetoothNAME", mCurrentDevice.getName());
+        editor.putString("bluetoothMAC", mCurrentDevice.getAddress());
         editor.apply();
     }
 
     public void writeObject(byte[] str) {
-        if (this.mBluetoothCommunThread != null && this.mBluetoothCommunThread.running) {
-            this.mBluetoothCommunThread.writeObject(str);
+        if (mBluetoothCommunThread != null && mBluetoothCommunThread.running) {
+            mBluetoothCommunThread.writeObject(str);
         }
     }
 
     public void clear() {
-        if (this.mConnectionSocket != null) {
+        runThread = false;
+        if (mConnectionSocket != null) {
             try {
                 mConnectionSocket.close();
-                mCurrentDevice = null;
-                mBluetoothCommunThread.interrupt();
-                sInstance = null;
             } catch (IOException e) {
                 e.printStackTrace();
             }
+            mCurrentDevice = null;
+            mBluetoothCommunThread = null;
+            mcreateSocket.cancel();
+            mcreateSocket = null;
+
+            sInstance = null;
+            Log.d(LOG_TAG, "CLEAR");
         }
     }
 
@@ -315,7 +198,7 @@ public class DeviceConnectionManager {
         private BluetoothDevice mDevice;
         private BluetoothSocket mSocket;
 
-        public createSocket(BluetoothDevice device) {
+        createSocket(BluetoothDevice device) {
             if(device == null) {
                 return;
             }
@@ -341,47 +224,53 @@ public class DeviceConnectionManager {
         @Override
         public void run() {
             super.run();
-            try
-            {
-                mSocket.connect();
-                try
-                {
-                    if ((mConnectionSocket != null) && isSocketConnect())
-                    {
-                        Log.i(LOG_TAG, "close preview device " + DeviceConnectionManager.this.mCurrentDevice);
-                        mBluetoothCommunThread.streamFlush();
-                        mConnectionSocket.close();
+            Log.d(LOG_TAG, "runThread = " + runThread);
+            if(!isSocketLost()) {
+                try {
+                    mSocket.connect();
+                    try {
+                        if ((mConnectionSocket != null) && isSocketConnect()) {
+                            Log.i(LOG_TAG, "close preview device " + DeviceConnectionManager.this.mCurrentDevice);
+                            mBluetoothCommunThread.streamFlush();
+                            mConnectionSocket.close();
+                        }
+                        mConnectionSocket = mSocket;
+                        mCurrentDevice = mDevice;
+                        saveBluetooth(false);
+                        if (mConnectStatusListener != null) {
+                            Log.d(LOG_TAG, "create socket successful");
+                            mConnectStatusListener.onConnectSuccess();
+                        }
+                    } catch (IOException e) {
+                        Log.i(LOG_TAG, "Connect unsuccess.", e);
                     }
-                    mConnectionSocket = mSocket;
-                    mCurrentDevice = mDevice;
-                    saveBluetooth(false);
-                    if (mConnectStatusListener != null)
-                    {
-                        Log.d(LOG_TAG, "create socket successful");
-                        mConnectStatusListener.onConnectSuccess();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    if (mConnectStatusListener != null) {
+                        mConnectStatusListener.onConnectError();
+                        Log.d(LOG_TAG, "Unable to connect");
+                        return;
                     }
-                }
-                catch (IOException e)
-                {
-                    Log.i(LOG_TAG, "Connect unsuccess.", e);
-                }
-            }
-            catch (IOException e)
-            {
-                //bluetooth_has_exception = true;
-                e.printStackTrace();
-                if (mConnectStatusListener != null)
-                {
-                    mConnectStatusListener.onConnectError();
-                    Log.d(LOG_TAG, "Unable to connect.", e);
-                    return;
-                }
+                /*
                 try {
                     mSocket.close();
+                    Log.d(LOG_TAG, "Socket closed !");
                 } catch (IOException e2) {
                     e2.printStackTrace();
                 }
+                */
+                }
             }
         }
+
+        void cancel() {
+            try {
+                mSocket.close();
+                Log.d(LOG_TAG, "Socket closed !");
+            } catch (IOException e2) {
+                e2.printStackTrace();
+            }
+        }
+
     }
 }

@@ -135,7 +135,7 @@ public class SearchActivity extends BaseActivity {
                     }
                 } else if (!BluetoothDevice.ACTION_BOND_STATE_CHANGED.equals(actionString) && !BluetoothAdapter.ACTION_STATE_CHANGED.equals(actionString)) {
                     if (BluetoothConnectionService.INTENT_CONNECTING.equals(actionString)) {
-                        Toast.makeText(SearchActivity.this, new StringBuilder(String.valueOf(SearchActivity.this.connectTo)).append(intent.getStringExtra(BluetoothDevice.EXTRA_NAME)).toString(), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(SearchActivity.this, new StringBuilder(String.valueOf(connectTo)).append(intent.getStringExtra(BluetoothDevice.EXTRA_NAME)).toString(), Toast.LENGTH_SHORT).show();
                     } else if (BluetoothConnectionService.INTENT_CONNECT_SUCCESS.equals(actionString)) {
                         SearchActivity.this.handleConnectSuccess();
                     } else if (BluetoothConnectionService.INTENT_CONNECT_ERROR.equals(actionString)) {

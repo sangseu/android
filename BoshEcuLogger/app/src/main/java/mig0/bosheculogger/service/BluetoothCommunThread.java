@@ -13,15 +13,15 @@ import java.lang.reflect.Field;
 
 public class BluetoothCommunThread extends Thread {
     private static String LOG_TAG;
-    byte[] buffer;
+    private byte[] buffer;
     private DataCallbackListener mCallbackListener;
     private ReadStatus mCurrentReadStatus;
     private InputStream mInputStream;
     private OutputStream mOutputStream;
     private BluetoothSocket mSocket;
-    public boolean running;
-    int totalBytes;
-    String totalData;
+    boolean running;
+    private int totalBytes;
+    private String totalData;
 
     private boolean bluetooth_has_exception = false;
 
@@ -37,7 +37,7 @@ public class BluetoothCommunThread extends Thread {
         void onSocketNullException();
     }
 
-    enum ReadStatus {
+    private enum ReadStatus {
         StatusIdle,
         StatusNormalBegin,
         StatusPartData
@@ -47,7 +47,7 @@ public class BluetoothCommunThread extends Thread {
         LOG_TAG = "BluetoothCommunThread";
     }
 
-    public BluetoothCommunThread(DataCallbackListener callbackListener, BluetoothSocket socket) {
+    BluetoothCommunThread(DataCallbackListener callbackListener, BluetoothSocket socket) {
         this.buffer = new byte[AccessibilityNodeInfoCompat.ACTION_NEXT_HTML_ELEMENT];
         this.totalData = "";
         this.totalBytes = 0;
@@ -81,14 +81,19 @@ public class BluetoothCommunThread extends Thread {
                 }
                 if (partByteSize > 0) {
                     byte[] buf_dataTemp = new byte[partByteSize];
+                    /*
                     for (int i = 0; i < partByteSize; i++) {
                         buf_dataTemp[i] = this.buffer[i];
                     }
+                    */
+                    /* replace manual array coppy */
+                    System.arraycopy(buffer, 0, buf_dataTemp, 0, partByteSize);
+
                     String partData = "";
-                    if (buf_dataTemp != null) {
-                        partData = Hex2StringUtils.bytesToHexString(buf_dataTemp);
-                        Log.i(LOG_TAG, "thread read = " + partData);
-                    }
+
+                    partData = Hex2StringUtils.bytesToHexString(buf_dataTemp);
+                    Log.i(LOG_TAG, "thread read = " + partData);
+
                     if (partData.startsWith("2A")) {
                         Log.d(LOG_TAG, "get status code 2A reset!");
                         this.mCurrentReadStatus = ReadStatus.StatusNormalBegin;
@@ -179,7 +184,7 @@ public class BluetoothCommunThread extends Thread {
         }
     }
 
-    public void writeObject(byte[] str) {
+    void writeObject(byte[] str) {
         try {
             this.mOutputStream.write(str);
             this.mOutputStream.flush();
@@ -189,7 +194,7 @@ public class BluetoothCommunThread extends Thread {
         }
     }
 
-    public void streamFlush() {
+    void streamFlush() {
         if (this.mOutputStream != null) {
             try {
                 this.mOutputStream.flush();
@@ -228,11 +233,14 @@ public class BluetoothCommunThread extends Thread {
     */
     @SuppressLint("NewApi")
     private boolean isSocketConnect() {
+        /*
         if(bluetooth_has_exception) return false;
         else return mSocket.isConnected();
+        */
+        return !bluetooth_has_exception && mSocket.isConnected();
     }
 
-    public void reset() {
+    void reset() {
         Log.d(LOG_TAG, "reset to StatusIdle!");
         this.mCurrentReadStatus = ReadStatus.StatusIdle;
         this.totalBytes = 0;

@@ -13,8 +13,8 @@
     <string name="abc_activity_chooser_view_see_all">See all</string>
     <string name="abc_shareactionprovider_share_with_application">Share with %s</string>
     <string name="abc_shareactionprovider_share_with">Share with</string>
-    <string name="switch_chinese">中</string>
-    <string name="switch_english">En</string>
+    <string name="switch_chinese">VI</string>
+    <string name="switch_english">EN</string>
     <string name="app_name">ECU diagnostic</string>
 
     <string name="main_item_1">main_item_1</string>

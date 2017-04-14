@@ -1,7 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
- <style name="AppBaseTheme" parent="@android:style/Theme.Light" />
-
+ <!--
+ @android:style/Theme.Light
+ Theme.AppCompat.Light.NoActionBar
+  -->
+ <style name="AppBaseTheme" parent="Theme.AppCompat.Light" />
+ <style name="My.ThemeOverlay.AppCompat.Dark.ActionBar" parent="ThemeOverlay.AppCompat.Dark.ActionBar" >
+  <item name="android:textSize">20sp</item>
+  <item name="android:textStyle">bold</item>
+ </style>
  <style name="Widget.AppCompat.Base.ActionBar" parent="">
   <item name="actionOverflowButtonStyle">@style/Widget.AppCompat.ActionButton.Overflow</item>
   <item name="actionButtonStyle">@style/Widget.AppCompat.ActionButton</item>

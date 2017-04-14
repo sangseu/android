@@ -8,6 +8,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.util.Log;
+import android.widget.BaseExpandableListAdapter;
 
 import mig0.bosheculogger.activity.BaseActivity;
 import mig0.bosheculogger.activity.MainActivity;
@@ -28,10 +29,12 @@ public class BluetoothConnectionService extends Service {
     boolean mCanceled;
     private Handler mHandler;
 
-    static class ServiceHandler extends Handler {
+    private int tryReconnect = 10; /* tryReconnect = 10 at first run */
+
+    private class ServiceHandler extends Handler {
         WeakReference<BluetoothConnectionService> mService;
 
-        public ServiceHandler(BluetoothConnectionService service) {
+        ServiceHandler(BluetoothConnectionService service) {
             this.mService = new WeakReference(service);
         }
 
@@ -39,9 +42,9 @@ public class BluetoothConnectionService extends Service {
         public void handleMessage(Message msg) {
             if (msg.what == BluetoothConnectionService.CMD_CONNECT) {
                 BluetoothConnectionService service = mService.get();
-                Log.d(BluetoothConnectionService.TAG, "service canceled " + service.mCanceled);
+                Log.d(TAG, "service canceled " + service.mCanceled);
                 if (service == null || service.mCanceled) {
-                    Log.e(BluetoothConnectionService.TAG, "service instanse null or canceled");
+                    Log.e(TAG, "service instanse null or canceled");
                 } else {
                     service.tryToConnectHistoryDevice();
                 }
@@ -74,19 +77,19 @@ public class BluetoothConnectionService extends Service {
         broadcastConnecting(device);
         DeviceConnectionManager.getInstance(this).connectDevice(device, new ConnectStatusListener() {
             public void onConnectSuccess() {
-                Log.d(BluetoothConnectionService.TAG, "onConnectSuccess!");
-                if (!BluetoothConnectionService.this.mCanceled) {
-                    BluetoothConnectionService.this.breadcastConnectSuccess();
+                Log.d(TAG, "onConnectSuccess!");
+                if (!mCanceled) {
+                    broadcastConnectSuccess();
                 }
             }
 
             public void onConnectError() {
-                Log.d(BluetoothConnectionService.TAG, "onConnectError!");
-                if (!BluetoothConnectionService.this.mCanceled) {
-                    BluetoothConnectionService.this.boradcastConnectError();
-                    if(BaseActivity.isAnimation == 0) {
-                        BluetoothConnectionService.this.mHandler.sendEmptyMessageDelayed(CMD_CONNECT, 10000);
-                    }
+                Log.d(TAG, "onConnectError!");
+                if (!mCanceled) {
+                    broadcastConnectError();
+                    Log.d(TAG, "broadcastConnectError()");
+                    Log.d(TAG, "tryReconnect = " + tryReconnect);
+                    mHandler.sendEmptyMessageDelayed(CMD_CONNECT, 1000);
                 }
             }
         });
@@ -102,11 +105,12 @@ public class BluetoothConnectionService extends Service {
         sendBroadcast(intent);
     }
 
-    private void boradcastConnectError() {
+    /* send mess to MainActivity */
+    private void broadcastConnectError() {
         sendBroadcast(new Intent(INTENT_CONNECT_ERROR));
     }
 
-    private void breadcastConnectSuccess() {
+    private void broadcastConnectSuccess() {
         sendBroadcast(new Intent(INTENT_CONNECT_SUCCESS));
     }
 

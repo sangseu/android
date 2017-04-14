@@ -14,6 +14,7 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.preference.PreferenceManager;
+import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
@@ -58,6 +59,7 @@ import mig0.bosheculogger.utils.ConfigManager;
 import mig0.bosheculogger.utils.ConfigManager.Strings;
 import mig0.bosheculogger.utils.Hex2StringUtils;
 import mig0.viewpager.PagerSlidingTabStrip;
+//import com.astuetz.PagerSlidingTabStrip;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -68,8 +70,6 @@ public class MainActivity extends AppCompatActivity {
 
     private static int max_handshake_retry = 3;
     private static int max_request_retry = 4;
-
-    private boolean animation = false;
 
     private static final int CMD_HANDSHAKE_TIMEOUT = 1004;
     private static final int CMD_REQUEST_CONTROL_MESSAGE = 1002;
@@ -110,15 +110,18 @@ public class MainActivity extends AppCompatActivity {
     private Handler mWorkHandler;
     private HandlerThread mWorkThread;
     private SeniorFragment seniorFragment;
-    private PagerSlidingTabStrip tabs;
+
+    private TabLayout tabs;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
 
         Log.e(LOG_TAG, "Main onCreate");
-        setContentView(R.layout.activity_main);
+
         getLanguageSettings();
+
         updateTitle(mCurrentLanguage);
 
         if (getSupportActionBar() != null) {
@@ -126,7 +129,9 @@ public class MainActivity extends AppCompatActivity {
             getSupportActionBar().setIcon(R.drawable.logo_trans);
             getSupportActionBar().setDisplayUseLogoEnabled(true);
         }
-        mMainHandler = new MainHandler(this);
+        mMainHandler = new MainHandler(MainActivity.this);
+        // creat activity MainHandler
+
         /*start thread that has a lopper*/
         mWorkThread = new HandlerThread("work");
         mWorkThread.start();
@@ -146,12 +151,17 @@ public class MainActivity extends AppCompatActivity {
         mDeviceConnectionManager = DeviceConnectionManager.getInstance(this);
         Log.d(LOG_TAG, "connection manager code = " + mDeviceConnectionManager.hashCode());
         dm = getResources().getDisplayMetrics();
-        mViewPager = (ViewPager) findViewById(R.id.pager);
-        tabs = (PagerSlidingTabStrip) findViewById(R.id.tabs);
+
         mPagerAdapter = new MyPagerAdapter(getSupportFragmentManager(), mCurrentLanguage);
+
+        mViewPager = (ViewPager) findViewById(R.id.pager);
         mViewPager.setAdapter(mPagerAdapter);
-        tabs.setViewPager(mViewPager);
+
+        tabs = (TabLayout) findViewById(R.id.tabs);
+        tabs.setupWithViewPager(mViewPager);
+
         setTabsValue();
+
         mReceiver = new ConnectionBroadcastReceiver();
     }
 
@@ -230,10 +240,10 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onDestroy() {
-        Log.e(LOG_TAG, "main onDestory");
         mDeviceConnectionManager.clear();
         BluetoothTools.cmdArray.clear();
         cleanMessage();
+
         mWorkHandler.removeMessages(CMD_WRITE);
         mWorkThread.quit();
         super.onDestroy();
@@ -280,6 +290,11 @@ public class MainActivity extends AppCompatActivity {
         handShake();
     }
 
+    /*
+    class MainHandler extends Handler {
+
+    }
+    */
 
     static class MainHandler extends Handler {
         WeakReference<MainActivity> mActivity;
@@ -288,17 +303,19 @@ public class MainActivity extends AppCompatActivity {
             mActivity = new WeakReference<MainActivity>(activity);
         }
 
-        /* handle message when handshake with ecu */
+        //handle message when handshake with ecu
+        @Override
         public void handleMessage(Message msg) {
+            Log.d(LOG_TAG, "handleMessage" + msg);
             MainActivity activity = mActivity.get();
             if (activity != null) {
                 switch (msg.what) {
-                    case MainActivity.MESSAGE_CONNECT_ERROR:/*3*/
-                    case MainActivity.MESSAGE_CONNECT_LOST:/*5*/
+                    case MainActivity.MESSAGE_CONNECT_ERROR://3
+                    case MainActivity.MESSAGE_CONNECT_LOST://5
                         Log.d(MainActivity.LOG_TAG, "MainHandler case MESSAGE_CONNECT_LOST");
                         activity.stopAnimation();
                         if (!activity.mPause) {
-                            activity.showMessage(ConfigManager.Strings.CONNNECT_ERROR);
+                            //activity.showMessage(ConfigManager.Strings.CONNNECT_ERROR);
                             Intent serviceIntent = new Intent(activity, BluetoothConnectionService.class);
                             serviceIntent.setAction(BluetoothConnectionService.ACTION_CONNECT);
                             activity.startService(serviceIntent);
@@ -306,7 +323,7 @@ public class MainActivity extends AppCompatActivity {
                         clearMessageQueue();
                         activity.mConnectionLost = true;
                         return;
-                    case MainActivity.MESSAGE_READ_OBJECT:/*4*/
+                    case MainActivity.MESSAGE_READ_OBJECT://4
                         Log.d(MainActivity.LOG_TAG, "MainHandler case MESSAGE_READ_OBJECT");
                         String messageRead = msg.obj.toString();
                         if (handshake_ecu_response.equals(messageRead)) {
@@ -320,19 +337,19 @@ public class MainActivity extends AppCompatActivity {
                         }
                         activity.handleMessageRead(messageRead);
                         return;
-                    case MainActivity.CMD_REQUEST_STATUS_MESSAGE /*1001*/:
+                    case MainActivity.CMD_REQUEST_STATUS_MESSAGE://1001
                         Log.d(MainActivity.LOG_TAG, "MainHandler case CMD_REQUEST_STATUS_MESSAGE");
                         activity.requestStatusMessage();
                         return;
-                    case MainActivity.CMD_REQUEST_CONTROL_MESSAGE /*1002*/:
+                    case MainActivity.CMD_REQUEST_CONTROL_MESSAGE: //1002
                         Log.d(MainActivity.LOG_TAG, "MainHandler case CMD_REQUEST_CONTROL_MESSAGE");
                         activity.requestControlMessage();
                         return;
-                    case MainActivity.CMD_REQUEST_RETURN_TIMEOUT /*1003*/:
+                    case MainActivity.CMD_REQUEST_RETURN_TIMEOUT: //1003
                         Log.d(MainActivity.LOG_TAG, "MainHandler case CMD_REQUEST_RETURN_TIMEOUT");
                         activity.retry(Strings.TIMEOUT);
                         return;
-                    case MainActivity.CMD_HANDSHAKE_TIMEOUT /*1004*/:
+                    case MainActivity.CMD_HANDSHAKE_TIMEOUT: //1004
                         Log.d(MainActivity.LOG_TAG, "MainHandler case CMD_HANDSHAKE_TIMEOUT");
                         activity.handshakeRetry();
                         return;
@@ -355,20 +372,18 @@ public class MainActivity extends AppCompatActivity {
             Log.i(LOG_TAG, "stopAnimation");
             mRunningAnimation.stop();
             mRunningAnimation.selectDrawable(0);/*stop animation, go to child 0*/
-            BaseActivity.isAnimation = 0;
         }
     }
 
     private void showMessage(String messageId) {
         /*get messahe in current language and show Toast*/
-        Toast.makeText(this, ConfigManager.getInstance(this).getString(mCurrentLanguage, messageId), Toast.LENGTH_LONG).show();
+        Toast.makeText(this, ConfigManager.getInstance(this).getString(mCurrentLanguage, messageId), Toast.LENGTH_SHORT).show();
     }
 
     private void startAnimation() {
         if (mRunningAnimation != null && !mRunningAnimation.isRunning()) {
             mRunningAnimation.start();
         }
-        BaseActivity.isAnimation = 0;
     }
 
     private void handleMessageRead(String messageRead) {
@@ -649,6 +664,9 @@ public class MainActivity extends AppCompatActivity {
             String basic = cManager.getString(lan, Strings.BASIC);
             String advanced = cManager.getString(lan, Strings.ADVANCED);
             titles = new String[]{diagnostic, basic, advanced};
+            Log.i(LOG_TAG, "updatePageTitle + " + diagnostic);
+            Log.i(LOG_TAG, "updatePageTitle + " + basic);
+            Log.i(LOG_TAG, "updatePageTitle + " + advanced);
         }
 
         @Override
@@ -718,15 +736,14 @@ public class MainActivity extends AppCompatActivity {
             if (BluetoothConnectionService.INTENT_CONNECTING.equals(action)) {
                 ConfigManager cManager = ConfigManager.getInstance(MainActivity.this);
                 String connect_to_device = intent.getStringExtra("deviceName");
-                if((connect_to_device != null) && !animation) {
-                    Toast.makeText(MainActivity.this, cManager.getString(mCurrentLanguage, Strings.CONNECT_TO) + connect_to_device, Toast.LENGTH_SHORT).show();
+                if(connect_to_device != null) {
+                    Log.i(LOG_TAG, cManager.getString(mCurrentLanguage, Strings.CONNECT_TO) + connect_to_device);
+                    //Toast.makeText(MainActivity.this, cManager.getString(mCurrentLanguage, Strings.CONNECT_TO) + connect_to_device, Toast.LENGTH_SHORT).show();
                 }
             } else if (BluetoothConnectionService.INTENT_CONNECT_SUCCESS.equals(action)) {
                 MainActivity.this.start();
             } else if (BluetoothConnectionService.INTENT_CONNECT_ERROR.equals(action)) {
-                if (!animation) {
-                    Toast.makeText(MainActivity.this, ConfigManager.getInstance(MainActivity.this).getString(mCurrentLanguage, Strings.CONNECT_FAIL), Toast.LENGTH_SHORT).show();
-                }
+                //Toast.makeText(MainActivity.this, ConfigManager.getInstance(MainActivity.this).getString(mCurrentLanguage, Strings.CONNECT_FAIL), Toast.LENGTH_SHORT).show();
             }
         }
     }
@@ -760,6 +777,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setTabsValue() {
+        /*
         tabs.setShouldExpand(true);
         tabs.setUnderlineHeight((int) TypedValue.applyDimension(1, 1.0f, this.dm));
         tabs.setIndicatorHeight((int) TypedValue.applyDimension(1, 4.0f, this.dm));
@@ -768,8 +786,12 @@ public class MainActivity extends AppCompatActivity {
         tabs.setSelectedTextColor(Color.parseColor("#39c0ff"));
         tabs.setTextColor(Color.parseColor("#004986"));
         tabs.setTabBackground(0);
-        tabs.setBackgroundColor(Color.parseColor("#d4e4f3"));
         tabs.setDividerColor(Color.parseColor("#004986"));
+        */
+
+        tabs.setBackgroundColor(Color.parseColor("#d4e4f3"));
+        tabs.setTabGravity(TabLayout.GRAVITY_FILL);
+        tabs.setTabTextColors(Color.parseColor("#004986"), Color.parseColor("#39c0ff"));
     }
 
     private void registerBroadcastReceiver() {
@@ -797,13 +819,13 @@ public class MainActivity extends AppCompatActivity {
         }
         button.setOnClickListener(new View.OnClickListener() {
             public void onClick(View arg0) {
-                if ("En".equals((String) button.getText())) {
+                if ("EN".equals((String) button.getText())) {
                     button.setText(MainActivity.this.getResources().getString(R.string.switch_chinese));
                     switchLanguage("en");
                     return;
                 }
 
-                /* set language to chinese, toggle button */
+                /* set language to zh, toggle button */
                 button.setText(getResources().getString(R.string.switch_english));
                 switchLanguage("zh");
             }
@@ -817,7 +839,7 @@ public class MainActivity extends AppCompatActivity {
         if (!TextUtils.isEmpty(lan)) {
             updateTitle(lan);
             mPagerAdapter.updatePageTitle(lan);
-            tabs.notifyDataSetChanged();
+            mPagerAdapter.notifyDataSetChanged();
             if (basicFragment != null) {
                 basicFragment.updateLanguage(lan);
             } else {

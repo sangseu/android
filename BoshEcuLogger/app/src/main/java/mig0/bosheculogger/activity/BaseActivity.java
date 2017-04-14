@@ -11,8 +11,6 @@ public class BaseActivity extends AppCompatActivity {
     protected String LOG_TAG = getClass().getSimpleName();
     protected String mCurrentLanguage;
 
-    public static int isAnimation = 0;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

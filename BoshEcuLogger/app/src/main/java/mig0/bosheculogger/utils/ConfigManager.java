@@ -334,10 +334,12 @@ public class ConfigManager {
     public static class Strings
     {
         public static final String ADVANCED = "advanced";
+        public static final String BASIC = "basic";
+        public static final String DIAGNOSTIC = "diagnostic";
+
         public static final String ALREADY_CONNECT = "already_connect";
         public static final String APP_NAME = "app_name";
         public static final String AVAILABLE_DEVICES = "available_devices";
-        public static final String BASIC = "basic";
         public static final String BT_CONFIG = "bt_config";
         public static final String BT_FOUND_DEVICE = "bt_found_device";
         public static final String BT_OK = "bt_ok";
@@ -350,7 +352,6 @@ public class ConfigManager {
         public static final String CONTENT_UNAVAILABLE_CONTROLLER = "content_unavailable_controller";
         public static final String DATA_VALIDATE_ERROR = "data_validate_error";
         public static final String DEVICE_CONNCET_ERROR = "device_connect_error";
-        public static final String DIAGNOSTIC = "diagnostic";
         public static final String EXIT_MESSAGE = "exit_message";
         public static final String EXIT_NAVBTN = "exit_navbtn";
         public static final String EXIT_POSBTN = "exit_posbtn";
