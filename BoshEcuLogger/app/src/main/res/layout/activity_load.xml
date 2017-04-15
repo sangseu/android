@@ -3,7 +3,9 @@
     android:gravity="center"
     android:orientation="vertical"
     android:id="@+id/load"
-    android:background="@drawable/smarthome_light_english"
+    android:background="@drawable/load_background"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
-    xmlns:android="http://schemas.android.com/apk/res/android" />
+    xmlns:android="http://schemas.android.com/apk/res/android" >
+
+</RelativeLayout>

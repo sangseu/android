@@ -108,28 +108,28 @@
                 promptzh="Thay thế ECU !" prompten="Please replace ECU."/>
 
             <!-- 细化故障： 参数故障 S[8]字节 第0位-->
-            <Fault en="EEPROMFault" zh="参数故障" position="8" bit="0"
+            <Fault en="EEPROMFault" zh="Lỗi EEPROM" position="8" bit="0"
                 promptzh="Thay thế ECU !" prompten="Please replace ECU."/>
 
             <!-- 细化故障： 程序代码故障 S[8]字节 第3位-->
-            <Fault en="ROMFault" zh="程序代码故障" position="8" bit="3"
-                promptzh="请更换控制器。" prompten="Please replace ECU."/>
+            <Fault en="ROMFault" zh="Lỗi ROM" position="8" bit="3"
+                promptzh="Thay thế ECU !" prompten="Please replace ECU."/>
 
             <!-- 细化故障： 内存故障 S[8]字节 第2位-->
-            <Fault en="RAMFault" zh="内存故障" position="8" bit="2"
-                promptzh="请更换控制器。" prompten="Please replace ECU."/>
+            <Fault en="RAMFault" zh="Lỗi RAM" position="8" bit="2"
+                promptzh="Thay thế ECU !" prompten="Please replace ECU."/>
 
             <!-- 细化故障： 堆栈溢出 S[8]字节 第4位-->
-            <Fault en="StackOverflow" zh="堆栈溢出" position="8" bit="4"
-                promptzh="请更换控制器。" prompten="Please replace ECU."/>
+            <Fault en="StackOverflow" zh="Lỗi Tràn Stack" position="8" bit="4"
+                promptzh="Thay thế ECU !" prompten="Please replace ECU."/>
 
             <!-- 细化故障： 电机短路故障 S[10]字节 第1位-->
-            <Fault en="MotorShortFault" zh="电机短路故障" position="10" bit="3"
-                promptzh="请检查电机及其连线或更换控制器。" prompten="Please check motor and connection or replace ECU."/>
+            <Fault en="MotorShortFault" zh="Lỗi Ngắn mạch động cơ" position="10" bit="3"
+                promptzh="Kiểm tra điện thân xe hoặc thay ECU, động cơ" prompten="Please check motor and connection or replace ECU."/>
 
             <!-- 细化故障： 过热保护 S[10]字节 第7位-->
-            <Fault en="ThermalFault" zh="过热保护" position="10" bit="7"
-                promptzh="请等待控制器冷却。" prompten="Please wait for the cooling of ECU."/>
+            <Fault en="ThermalFault" zh="Lỗi quá nhiệt" position="10" bit="7"
+                promptzh="Làm mát ECU" prompten="Please wait for the cooling of ECU."/>
         </FaultGroup>
     </Diagnostic>
 
@@ -137,63 +137,63 @@
     <BasicInformation>
         <!-- 非位变量, 内容:电池电压, 字长:2, 起始字节:36, 转换公式:x/128, 小数位数:1, 单位:V -->
         <Information 
-            en="Battery Voltage" zh="电池电压" length="2" start="36" expression="x/128" decimalLength="1" unit="V" signed="N"/>
+            en="Battery Voltage" zh="Điện áp Pin" length="2" start="36" expression="x/128" decimalLength="1" unit="V" signed="N"/>
 
         <!-- 非位变量, 内容:转把, 字长:1, 起始字节:43, 转换公式:x*100/255, 小数位数:0, 单位:% -->
-        <Information en="Throttle Input" zh="转把" length="1" start="43" expression="x*100/255" decimalLength="0" unit="%" signed="N"/>
+        <Information en="Throttle Input" zh="Tay ga" length="1" start="43" expression="x*100/255" decimalLength="0" unit="%" signed="N"/>
 
         <!-- 非位变量, 内容:车速, 字长:2, 起始字节:52, 转换公式:x*0.0768/32, 小数位数:1, 单位:km/h -->
-        <Information en="Speed" zh="车速" length="2" start="54" expression="x/100" decimalLength="1" unit="km/h" signed="Y"/>
+        <Information en="Speed" zh="Tốc độ" length="2" start="54" expression="x/100" decimalLength="1" unit="km/h" signed="Y"/>
 
         <!-- 非位变量, 内容:速度模式, 字长:1, 起始字节:58, 转换公式:x+1, 小数位数:0, 单位: -->
-        <Information en="Speed Modes" zh="速度模式" length="1" start="58" expression="x+1" decimalLength="0" unit="" signed="N"/>
+        <Information en="Speed Modes" zh="Chế độ Tốc độ" length="1" start="58" expression="x+1" decimalLength="0" unit="" signed="N"/>
 
         <!-- 位变量, 内容:巡航, 起始字节:56, 位:2, 位"1"中文显示:开, 位"0"中文显示:关， 位"1"英文显示:On, 位"0"英文显示:Off-->
-        <BitInfomation en="Cruise" zh="巡航" position="56" bit="3" zh1="开" zh0="关" en1="On" en0="Off"/>
+        <BitInfomation en="Cruise" zh="Chế độ Hành trình" position="56" bit="3" zh1="On" zh0="Off" en1="On" en0="Off"/>
 
         <!-- 位变量, 内容:限速, 起始字节:56, 位:7, 位"1"中文显示:开, 位"0"中文显示:关， 位"1"英文显示:On, 位"0"英文显示:Off-->
-        <BitInfomation en="Speed Limit" zh="限速" position="11" bit="0" zh1="开" zh0="关" en1="On" en0="Off"/>
+        <BitInfomation en="Speed Limit" zh="Giới hạn tốc độ" position="11" bit="0" zh1="On" zh0="Off" en1="On" en0="Off"/>
 
         <!-- 位变量, 内容:刹车, 起始字节:56, 位:5, 位"1"中文显示:开, 位"0"中文显示:关， 位"1"英文显示:On, 位"0"英文显示:Off-->
-        <BitInfomation en="eBraking" zh="刹车" position="56" bit="5" zh1="开" zh0="关" en1="On" en0="Off"/>
+        <BitInfomation en="eBraking" zh="Phanh điện" position="56" bit="5" zh1="On" zh0="Off" en1="On" en0="Off"/>
 
         <!-- 位变量, 内容:防盗, 起始字节:56, 位:6, 位"1"中文显示:开, 位"0"中文显示:关， 位"1"英文显示:On, 位"0"英文显示:Off-->
-        <BitInfomation en="Anti-Theft" zh="防盗" position="56" bit="6" zh1="开" zh0="关" en1="On" en0="Off"/>
+        <BitInfomation en="Anti-Theft" zh="Chống trộm" position="56" bit="6" zh1="On" zh0="Off" en1="On" en0="Off"/>
 
         <!-- 非位变量, 内容:单次里程, 字长:2, 起始字节:0, 转换公式:x*1.28/1000, 小数位数:1, 单位:km -->
-        <Information en="Trip Odometer" zh="单次里程" length="2" start="0" expression="x/100" decimalLength="1" unit="km" signed="N"/>
+        <Information en="Trip Odometer" zh="Quãng đường gần đây" length="2" start="0" expression="x/100" decimalLength="1" unit="km" signed="N"/>
 
         <!-- 非位变量, 内容:总里程, 字长:4, 起始字节:2, 转换公式:x*1.28/1000, 小数位数:0, 单位:km -->
-        <Information en="Odometer" zh="总里程" length="4" start="2" expression="x/1000" decimalLength="0" unit="km" signed="N"/>
+        <Information en="Odometer" zh="Tổng quãng đường" length="4" start="2" expression="x/1000" decimalLength="0" unit="km" signed="N"/>
     </BasicInformation>
 
     <!-- 高级信息 -->
     <AdvancedInformation>
-        <BaseInformation en="Software Info" zh="软件信息"/>
-        <BaseInformation en="Hardware Info" zh="硬件信息"/>
-        <BaseInformation en="Serial No" zh="序列号"/>
+        <BaseInformation en="Software Info" zh="Phần mềm"/>
+        <BaseInformation en="Hardware Info" zh="Phần cứng"/>
+        <BaseInformation en="Serial No" zh="Serial No"/>
         <!-- 非位变量, 内容:B+电压, 字长:2, 起始字节:38, 转换公式:x/128, 小数位数:1, 单位:V -->
-        <Information en="B+ Voltage" zh="B+电压" length="2" start="38" expression="x/128" decimalLength="1" unit="V" signed="N"/>
+        <Information en="B+ Voltage" zh="Điện thế B+" length="2" start="38" expression="x/128" decimalLength="1" unit="V" signed="N"/>
 
         <!-- 非位变量, 内容:电池电流, 字长:2, 起始字节:48, 转换公式:x/128, 小数位数:0, 单位:A -->
-        <Information en="Battery Current" zh="电池电流" length="2" start="48" expression="x/128" decimalLength="0" unit="A" signed="Y"/>
+        <Information en="Battery Current" zh="Dòng Pin" length="2" start="48" expression="x/128" decimalLength="0" unit="A" signed="Y"/>
 
         <!-- 非位变量, 内容:电机电流, 字长:2, 起始字节:44, 转换公式:x/128, 小数位数:0, 单位:A -->
-        <Information en="Motor Current" zh="电机电流" length="2" start="44" expression="x/128" decimalLength="0" unit="A" signed="Y"/>
+        <Information en="Motor Current" zh="Dòng động cơ" length="2" start="44" expression="x/128" decimalLength="0" unit="A" signed="Y"/>
 
         <!-- 非位变量, 内容:14V 电源, 字长:2, 起始字节:40, 转换公式:x/128, 小数位数:1, 单位:V -->
-        <Information en="Power 14V Voltage" zh="14V 电源" length="2" start="40" expression="x/128" decimalLength="1" unit="V" signed="N"/>
+        <Information en="Power 14V Voltage" zh="Nguồn 14V" length="2" start="40" expression="x/128" decimalLength="1" unit="V" signed="N"/>
 
         <!-- 非位变量, 内容:内部温度, 字长:1, 起始字节:42, 转换公式:x-55, 小数位数:0, 单位:°C -->
-        <Information en="Internal Temperature" zh="内部温度" length="1" start="42" expression="x-55" decimalLength="0" unit="°C" signed="N"/>
+        <Information en="Internal Temperature" zh="Nhiệt độ ECU" length="1" start="42" expression="x-55" decimalLength="0" unit="°C" signed="N"/>
 
         <!-- 位变量, 内容:霍尔 A, 起始字节:35, 位:0, 位"1"中文显示:1, 位"0"中文显示:0， 位"1"英文显示:1, 位"0"英文显示:0-->
-        <BitInfomation en="Hall A" zh="霍尔 A" position="35" bit="0" zh1="1" zh0="0" en1="1" en0="0"/>
+        <BitInfomation en="Hall A" zh="Hall A" position="35" bit="0" zh1="1" zh0="0" en1="1" en0="0"/>
 
         <!-- 位变量, 内容:霍尔 B, 起始字节:35, 位:1, 位"1"中文显示:1, 位"0"中文显示:0， 位"1"英文显示:1, 位"0"英文显示:0-->
-        <BitInfomation en="Hall B" zh="霍尔 B" position="35" bit="1" zh1="1" zh0="0" en1="1" en0="0"/>
+        <BitInfomation en="Hall B" zh="Hall B" position="35" bit="1" zh1="1" zh0="0" en1="1" en0="0"/>
 
         <!-- 位变量, 内容:霍尔 C, 起始字节:35, 位:2, 位"1"中文显示:1, 位"0"中文显示:0， 位"1"英文显示:1, 位"0"英文显示:0-->
-        <BitInfomation en="Hall C" zh="霍尔 C" position="35" bit="2" zh1="1" zh0="0" en1="1" en0="0"/>
+        <BitInfomation en="Hall C" zh="Hall C" position="35" bit="2" zh1="1" zh0="0" en1="1" en0="0"/>
     </AdvancedInformation>
 </bosch>

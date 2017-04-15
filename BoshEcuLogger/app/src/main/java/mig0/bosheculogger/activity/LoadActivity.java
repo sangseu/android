@@ -44,9 +44,9 @@ public class LoadActivity extends Activity {
         RelativeLayout relativeLayout = (RelativeLayout) findViewById(R.id.load);
         /* chinese background */
         if ("zh".equals(mCurrentLanguage)) {
-            relativeLayout.setBackgroundResource(R.drawable.smarthome_light_chinese);
+            relativeLayout.setBackgroundResource(R.drawable.load_background);
         } else { /* eng background */
-            relativeLayout.setBackgroundResource(R.drawable.smarthome_light_english);
+            relativeLayout.setBackgroundResource(R.drawable.load_background);
         }
 
         final Handler handler = new Handler();

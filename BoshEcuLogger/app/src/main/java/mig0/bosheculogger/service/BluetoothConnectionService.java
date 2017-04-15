@@ -29,7 +29,7 @@ public class BluetoothConnectionService extends Service {
     boolean mCanceled;
     private Handler mHandler;
 
-    private int tryReconnect = 10; /* tryReconnect = 10 at first run */
+    //private int tryReconnect = 10; /* tryReconnect = 10 at first run */
 
     private class ServiceHandler extends Handler {
         WeakReference<BluetoothConnectionService> mService;
@@ -80,6 +80,12 @@ public class BluetoothConnectionService extends Service {
                 Log.d(TAG, "onConnectSuccess!");
                 if (!mCanceled) {
                     broadcastConnectSuccess();
+                    //-----
+                    mHandler.removeMessages(CMD_CONNECT);
+                    stopSelf();
+                    mCanceled = true;
+                    //-----
+                    Log.d(TAG, "broadcastConnectSuccess()");
                 }
             }
 
@@ -88,7 +94,6 @@ public class BluetoothConnectionService extends Service {
                 if (!mCanceled) {
                     broadcastConnectError();
                     Log.d(TAG, "broadcastConnectError()");
-                    Log.d(TAG, "tryReconnect = " + tryReconnect);
                     mHandler.sendEmptyMessageDelayed(CMD_CONNECT, 1000);
                 }
             }

@@ -1,0 +1,41 @@
+04-15 10:58:12.673 21622-21622/mig0.bosheculogger D/BLTconnectionSerivce: service got action : mig0.bosheculogger.ACTION_CANCEL
+04-15 10:58:12.693 21622-21622/mig0.bosheculogger I/BLTconnectionSerivce: Service onDestroy
+04-15 10:59:02.792 21622-21622/mig0.bosheculogger I/BLTconnectionSerivce: Service onCreate
+04-15 10:59:02.792 21622-21622/mig0.bosheculogger D/BLTconnectionSerivce: service got action : mig0.bosheculogger.ACTION_CANCEL
+04-15 10:59:02.812 21622-21622/mig0.bosheculogger I/BLTconnectionSerivce: Service onDestroy
+04-15 10:59:07.357 21622-21622/mig0.bosheculogger I/BLTconnectionSerivce: Service onCreate
+04-15 10:59:07.357 21622-21622/mig0.bosheculogger D/BLTconnectionSerivce: service got action : mig0.bosheculogger.ACTION_CANCEL
+04-15 10:59:07.367 21622-21622/mig0.bosheculogger I/BLTconnectionSerivce: Service onDestroy
+04-15 10:59:59.568 21622-21622/mig0.bosheculogger I/BLTconnectionSerivce: Service onCreate
+04-15 10:59:59.568 21622-21622/mig0.bosheculogger D/BLTconnectionSerivce: service got action : mig0.bosheculogger.ACTION_CONNECT
+04-15 10:59:59.578 21622-21622/mig0.bosheculogger D/BLTconnectionSerivce: service got action : mig0.bosheculogger.ACTION_CONNECT
+04-15 10:59:59.578 21622-21622/mig0.bosheculogger D/BLTconnectionSerivce: service canceled false
+04-15 10:59:59.578 21622-21622/mig0.bosheculogger D/BLTconnectionSerivce: try to connect device 00:1D:43:9A:E0:78
+04-15 10:59:59.588 21622-21622/mig0.bosheculogger D/BLTconnectionSerivce: service canceled false
+04-15 10:59:59.588 21622-21622/mig0.bosheculogger D/BLTconnectionSerivce: try to connect device 00:1D:43:9A:E0:78
+04-15 10:59:59.618 21622-31605/mig0.bosheculogger D/BLTconnectionSerivce: onConnectError!
+04-15 10:59:59.618 21622-31605/mig0.bosheculogger D/BLTconnectionSerivce: broadcastConnectError()
+04-15 11:00:00.629 21622-21622/mig0.bosheculogger D/BLTconnectionSerivce: service canceled false
+04-15 11:00:00.639 21622-21622/mig0.bosheculogger D/BLTconnectionSerivce: try to connect device 00:1D:43:9A:E0:78
+04-15 11:00:00.709 21622-31636/mig0.bosheculogger D/BLTconnectionSerivce: onConnectError!
+04-15 11:00:00.709 21622-31636/mig0.bosheculogger D/BLTconnectionSerivce: broadcastConnectError()
+04-15 11:00:01.710 21622-21622/mig0.bosheculogger D/BLTconnectionSerivce: service canceled false
+04-15 11:00:01.720 21622-21622/mig0.bosheculogger D/BLTconnectionSerivce: try to connect device 00:1D:43:9A:E0:78
+04-15 11:00:01.820 21622-31649/mig0.bosheculogger D/BLTconnectionSerivce: onConnectError!
+04-15 11:00:01.820 21622-31649/mig0.bosheculogger D/BLTconnectionSerivce: broadcastConnectError()
+04-15 11:00:02.821 21622-21622/mig0.bosheculogger D/BLTconnectionSerivce: service canceled false
+04-15 11:00:02.831 21622-21622/mig0.bosheculogger D/BLTconnectionSerivce: try to connect device 00:1D:43:9A:E0:78
+04-15 11:00:02.871 21622-31664/mig0.bosheculogger D/BLTconnectionSerivce: onConnectError!
+04-15 11:00:02.881 21622-31664/mig0.bosheculogger D/BLTconnectionSerivce: broadcastConnectError()
+04-15 11:00:03.882 21622-21622/mig0.bosheculogger D/BLTconnectionSerivce: service canceled false
+04-15 11:00:03.882 21622-21622/mig0.bosheculogger D/BLTconnectionSerivce: try to connect device 00:1D:43:9A:E0:78
+04-15 11:00:03.942 21622-31681/mig0.bosheculogger D/BLTconnectionSerivce: onConnectError!
+04-15 11:00:03.942 21622-31681/mig0.bosheculogger D/BLTconnectionSerivce: broadcastConnectError()
+04-15 11:00:04.953 21622-21622/mig0.bosheculogger D/BLTconnectionSerivce: service canceled false
+04-15 11:00:04.953 21622-21622/mig0.bosheculogger D/BLTconnectionSerivce: try to connect device 00:1D:43:9A:E0:78
+04-15 11:00:04.983 21622-31705/mig0.bosheculogger D/BLTconnectionSerivce: onConnectError!
+04-15 11:00:04.983 21622-31705/mig0.bosheculogger D/BLTconnectionSerivce: broadcastConnectError()
+04-15 11:00:05.033 21622-31601/mig0.bosheculogger D/BLTconnectionSerivce: onConnectSuccess!
+04-15 11:00:05.984 21622-21622/mig0.bosheculogger D/BLTconnectionSerivce: service canceled false
+04-15 11:00:05.994 21622-21622/mig0.bosheculogger D/BLTconnectionSerivce: try to connect device 00:1D:43:9A:E0:78
+04-15 11:00:06.004 21622-21622/mig0.bosheculogger D/BLTconnectionSerivce: onConnectSuccess!

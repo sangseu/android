@@ -52,6 +52,7 @@
     <string id="already_connect" en="already connect" zh="Đã kết nối"/>
     <string id="connect_to" en="connecting to " zh="Đang kết nối với "/>
     <string id="connect_fail" en="connect fail" zh="Kết nối thất bại"/>
+    <string id="reconnect_ok" en="reconnect ok" zh="Kết nối lại thành công"/>
 
     <!-- Help dialog -->
     <string id="help_title" en="Help" zh="Trợ giúp"/>

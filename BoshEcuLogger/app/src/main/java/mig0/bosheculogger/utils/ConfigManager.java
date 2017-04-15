@@ -349,6 +349,7 @@ public class ConfigManager {
         public static final String CONNECT_FAIL = "connect_fail";
         public static final String CONNECT_TO = "connect_to";
         public static final String CONNNECT_ERROR = "connect_error";
+        public static final String RE_CONNECT_OK = "reconnect_ok";
         public static final String CONTENT_UNAVAILABLE_CONTROLLER = "content_unavailable_controller";
         public static final String DATA_VALIDATE_ERROR = "data_validate_error";
         public static final String DEVICE_CONNCET_ERROR = "device_connect_error";

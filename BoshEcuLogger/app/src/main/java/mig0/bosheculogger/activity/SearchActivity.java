@@ -64,6 +64,7 @@ public class SearchActivity extends BaseActivity {
     private String connectError;
     private String connectFail;
     private String connectTo;
+    private String reConnectOk;
     private String exitCancel;
     private String exitMessage;
     private String exitOk;
@@ -531,6 +532,7 @@ public class SearchActivity extends BaseActivity {
         this.exitCancel = cManager.getString(this.mCurrentLanguage, Strings.EXIT_NAVBTN);
         this.alreadyConnect = cManager.getString(this.mCurrentLanguage, Strings.ALREADY_CONNECT);
         this.connectTo = cManager.getString(this.mCurrentLanguage, Strings.CONNECT_TO);
+        this.reConnectOk = cManager.getString(this.mCurrentLanguage, Strings.RE_CONNECT_OK);
         this.connectFail = cManager.getString(this.mCurrentLanguage, Strings.CONNECT_FAIL);
     }
 

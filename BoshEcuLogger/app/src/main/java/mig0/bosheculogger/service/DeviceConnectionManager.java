@@ -225,7 +225,7 @@ public class DeviceConnectionManager {
         public void run() {
             super.run();
             Log.d(LOG_TAG, "runThread = " + runThread);
-            if(!isSocketLost()) {
+            //if(!isSocketLost()) {
                 try {
                     mSocket.connect();
                     try {
@@ -260,7 +260,7 @@ public class DeviceConnectionManager {
                 }
                 */
                 }
-            }
+            //}
         }
 
         void cancel() {

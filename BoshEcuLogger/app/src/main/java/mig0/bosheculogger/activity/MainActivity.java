@@ -79,6 +79,7 @@ public class MainActivity extends AppCompatActivity {
     public static final int MESSAGE_CONNECT_ERROR = 3;
     public static final int MESSAGE_READ_OBJECT = 4;
     public static final int MESSAGE_CONNECT_LOST = 5;
+    public static final int MESSAGE_KILL_BLT_SERVICE = 6;
 
     public static final int DIANOGE_FRAGMENT = 0;
     public static final int BASIC_FRAGMENT = 1;
@@ -243,9 +244,11 @@ public class MainActivity extends AppCompatActivity {
         mDeviceConnectionManager.clear();
         BluetoothTools.cmdArray.clear();
         cleanMessage();
-
         mWorkHandler.removeMessages(CMD_WRITE);
         mWorkThread.quit();
+
+        mMainHandler.sendEmptyMessage(MESSAGE_KILL_BLT_SERVICE);
+
         super.onDestroy();
     }
 
@@ -253,7 +256,7 @@ public class MainActivity extends AppCompatActivity {
         mPause = false;
         mConnectionLost = false;
         if (mDeviceConnectionManager.isSocketLost()) {
-            mMainHandler.sendEmptyMessage(MESSAGE_CONNECT_LOST);/*5*/
+            mMainHandler.sendEmptyMessage(MESSAGE_CONNECT_LOST); //5
             return;
         }
         mDeviceConnectionManager.startCommuThread(new BluetoothCommunThread.DataCallbackListener() {
@@ -315,7 +318,7 @@ public class MainActivity extends AppCompatActivity {
                         Log.d(MainActivity.LOG_TAG, "MainHandler case MESSAGE_CONNECT_LOST");
                         activity.stopAnimation();
                         if (!activity.mPause) {
-                            //activity.showMessage(ConfigManager.Strings.CONNNECT_ERROR);
+                            activity.showMessage(Strings.CONNNECT_ERROR);
                             Intent serviceIntent = new Intent(activity, BluetoothConnectionService.class);
                             serviceIntent.setAction(BluetoothConnectionService.ACTION_CONNECT);
                             activity.startService(serviceIntent);
@@ -323,19 +326,40 @@ public class MainActivity extends AppCompatActivity {
                         clearMessageQueue();
                         activity.mConnectionLost = true;
                         return;
+
+                    case MESSAGE_KILL_BLT_SERVICE: //6
+                        Intent serviceIntent2 = new Intent(activity, BluetoothConnectionService.class);
+                        serviceIntent2.setAction(BluetoothConnectionService.ACTION_CANCEL);
+                        activity.startService(serviceIntent2);
+                        Log.d(MainActivity.LOG_TAG, "MainHandler case MESSAGE_KILL_BLT_SERVICE");
+
                     case MainActivity.MESSAGE_READ_OBJECT://4
                         Log.d(MainActivity.LOG_TAG, "MainHandler case MESSAGE_READ_OBJECT");
-                        String messageRead = msg.obj.toString();
-                        if (handshake_ecu_response.equals(messageRead)) {
-                            Log.d(MainActivity.LOG_TAG, "1.handshake success!");
-                            activity.hasHandShaked = true;
-                            activity.mHandshakeRetry = 0;
-                            activity.startAnimation();
-                            removeMessages(MainActivity.CMD_HANDSHAKE_TIMEOUT);
-                            sendEmptyMessage(MainActivity.CMD_REQUEST_CONTROL_MESSAGE);
-                            return;
+                        String messageRead;
+                        try {
+                            messageRead = msg.obj.toString();
+                            if (handshake_ecu_response.equals(messageRead)) {
+                                Log.d(MainActivity.LOG_TAG, "1.handshake success!");
+                                activity.hasHandShaked = true;
+                                activity.mHandshakeRetry = 0;
+                                activity.startAnimation();
+                                removeMessages(MainActivity.CMD_HANDSHAKE_TIMEOUT);
+                                sendEmptyMessage(MainActivity.CMD_REQUEST_CONTROL_MESSAGE);
+                                activity.showMessage(Strings.RE_CONNECT_OK);
+                                return;
+                            }
+                            activity.handleMessageRead(messageRead);
+                        } catch (NullPointerException e){
+                            e.printStackTrace();
                         }
-                        activity.handleMessageRead(messageRead);
+
+                        /*
+                        // connect ok, kill BluetoothConnectionService()
+                        Intent serviceIntent2 = new Intent(activity, BluetoothConnectionService.class);
+                        serviceIntent2.setAction(BluetoothConnectionService.ACTION_CANCEL);
+                        activity.startService(serviceIntent2);
+                        //
+                        */
                         return;
                     case MainActivity.CMD_REQUEST_STATUS_MESSAGE://1001
                         Log.d(MainActivity.LOG_TAG, "MainHandler case CMD_REQUEST_STATUS_MESSAGE");
